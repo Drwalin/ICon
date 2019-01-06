@@ -59,7 +59,6 @@ namespace ICon
 		unsigned Accept( std::shared_ptr<FixedConnection> con );
 		
 		// only one istance of AcceptNoLock can be running at one time
-		
 		template < typename CallBackType, typename... Args >
 		void AcceptNoLock( std::shared_ptr<FixedConnection> con, CallBackType callBackFunction, Args... args );
 		

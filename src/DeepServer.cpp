@@ -105,8 +105,6 @@ namespace ICon
 		{
 			this->StopListening();
 			this->acceptor.close();
-			//this->acceptor = boost::asio::ip::tcp::acceptor( *ICon::ioService );
-			//this->endpoint = boost::asio::ip::tcp::endpoint();
 			this->port = 0;
 			this->opened = false;
 		}

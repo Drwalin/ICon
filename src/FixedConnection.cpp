@@ -183,7 +183,7 @@ namespace ICon
 		}
 	}
 	
-	unsigned long long FixedConnection::Send( void * buffer, const unsigned bytes )
+	unsigned long long FixedConnection::Send( const void * buffer, const unsigned bytes )
 	{
 		if( this->IsValid() )
 		{
@@ -224,10 +224,7 @@ namespace ICon
 		if( this->IsValid() )
 		{
 			this->isValid = false;
-			//this->socket.shutdown( boost::asio::ip::tcp::socket::shutdown_both );
 			this->socket.close();
-			//this->socket = boost::asio::ip::tcp::socket( *ICon::ioService );
-			//this->command = boost::asio::socket_base::bytes_readable();
 		}
 	}
 	
@@ -238,13 +235,10 @@ namespace ICon
 			boost::system::error_code ec;
 			unsigned zero = 0;
 			this->socket.write_some( boost::asio::buffer( &zero, sizeof(unsigned) ), ec );
-			//this->socket.shutdown( boost::asio::ip::tcp::socket::shutdown_both );
 			this->socket.close();
 			while( this->isValid )
 				this->ReceiveLock();
 			this->isValid = false;
-			//this->socket = boost::asio::ip::tcp::socket( *ICon::ioService );
-			//this->command = boost::asio::socket_base::bytes_readable();
 		}
 	}
 	

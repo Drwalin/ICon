@@ -66,7 +66,7 @@ namespace ICon
 		const std::vector < unsigned char > & GetMessage();
 		void PopMessage( unsigned count = 1 );
 		
-		unsigned long long Send( void * buffer, const unsigned bytes );		// return bytes sent
+		unsigned long long Send( const void * buffer, const unsigned bytes );		// return bytes sent
 		
 		void ErrorClose();
 		void Close();
