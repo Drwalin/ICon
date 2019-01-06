@@ -88,11 +88,11 @@ namespace ICon
 			failedToRestoreMessage =				28,
 			tryingToSendInvalidBuffersArray =		29,
 			tryingToSendThroughInvalidConnection =	30,
-			tryingToSendThroughInvalidConnection =	31,
-			tryingToReadFromInvalidConnection =		32,
-			failedToReceiveBuffer =					33,
-			receivedInvalidBuffer =					34,
-			tryingToReadFromBufferOfTypeRaw =		35,
+			tryingToReadFromInvalidConnection =		31,
+			failedToReceiveBuffer =					32,
+			receivedInvalidBuffer =					33,
+			tryingToReadFromBufferOfTypeRaw =		34,
+			failedToReceiveToValidType =			35,
 			
 			failedToGetMessageLockWhichReturnedConstReference = 36,
 			

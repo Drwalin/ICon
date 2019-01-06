@@ -37,7 +37,7 @@ namespace ICon
 		}
 	}
 	
-	bool Connection::IsAnythingToRecevie( bool updateReceive = true )
+	bool Connection::IsAnythingToRecevie( bool updateReceive )
 	{
 		if( this->IsValid() && updateReceive )
 		{
@@ -65,7 +65,7 @@ namespace ICon
 			this->buffer.resize( 1 );
 			this->buffer[0] = Binary::Type::RAW;
 			
-			const void buffers[2] = { &(this->buffer.front()), src };
+			const void * buffers[2] = { &(this->buffer.front()), src };
 			const unsigned bytes[2] = { 1, size };
 			
 			unsigned long long ret = this->con->Send( buffers, bytes, 2 );
@@ -88,15 +88,15 @@ namespace ICon
 			{
 				if( this->buffer.size() <= size )
 				{
-					memove( dst, &(this->buffer.front()), this->buffer.size() );
+					memmove( dst, &(this->buffer.front()), this->buffer.size() );
 					unsigned long long ret =this->buffer.size();
 					this->buffer.resize( 0 );
 					return ret;
 				}
 				else
 				{
-					memove( dst, &(this->buffer.front()), size );
-					this->buffer.erase( this.buffer.begin(), this->buffer.begin() + size );
+					memmove( dst, &(this->buffer.front()), size );
+					this->buffer.erase( this->buffer.begin(), this->buffer.begin() + size );
 					return size;
 				}
 			}
@@ -124,10 +124,10 @@ namespace ICon
 		}
 		if( this->IsValid() )
 		{
-			unsigned long long messageSize = this->con->GetMessageLock().size()
+			unsigned long long messageSize = this->con->GetMessageLock().size();
 			if( messageSize > 0 )
 			{
-				unsigned long long typeSize = Binary::Type::GetSize( this->con->GetMessageLock() );
+				unsigned long long typeSize = Binary::Type::GetOffset( this->con->GetMessageLock() );
 				if( typeSize > messageSize )
 				{
 					return messageSize - typeSize;
@@ -153,6 +153,14 @@ namespace ICon
 		return this->con;
 	}
 	
+	void Connection::Close()
+	{
+		if( this->IsValid() )
+		{
+			this->con->Close();
+		}
+	}
+	
 	Connection::Connection( std::shared_ptr<FixedConnection> con_ ) :
 		con(con_)
 	{
@@ -160,7 +168,7 @@ namespace ICon
 	}
 	
 	Connection::Connection() :
-		con(nullptr)
+		con(new FixedConnection())
 	{
 		this->buffer.reserve( 1024*512 );
 	}

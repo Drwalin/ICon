@@ -114,7 +114,7 @@ namespace ICon
 	{
 		if( this->IsValid() )
 		{
-			if( this->buffer.size() == 0 )
+			if( this->buffers.size() == 0 )
 			{
 				boost::system::error_code ec;
 				unsigned long long availableBytesToReceive = 4096;
@@ -132,6 +132,7 @@ namespace ICon
 				{
 					ICon::Error::Push( ICon::Error::Code::connectionBrokenWhileReceiving );
 					this->ErrorClose();
+					return;
 				}
 			}
 			else
@@ -140,9 +141,7 @@ namespace ICon
 			}
 		}
 		else
-		{
 			ICon::Error::Push( ICon::Error::Code::tryingToReceiveFromInvalidConnection );
-		}
 	}
 	
 	unsigned FixedConnection::CountReceivedMessages() const
@@ -245,7 +244,7 @@ namespace ICon
 					sumBytesL += bytes[i];
 				}
 				
-				if( sumBytesL < buffers || subBytesL > (unsigned long long)ICon::FixedConnection::maxBufferSize )
+				if( sumBytesL < buffers || sumBytesL > (unsigned long long)ICon::FixedConnection::maxBufferSize )
 				{
 					ICon::Error::Push( ICon::Error::tryingToSendInvalidDataSize );
 					return 0;

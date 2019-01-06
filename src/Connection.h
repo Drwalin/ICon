@@ -53,6 +53,8 @@ namespace ICon
 		void SetFixedConnection( std::shared_ptr<FixedConnection> con );
 		std::shared_ptr<FixedConnection> GetFixedConnection();
 		
+		void Close();
+		
 		Connection( std::shared_ptr<FixedConnection> con_ );
 		Connection();
 		~Connection();

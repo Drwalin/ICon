@@ -25,7 +25,7 @@ namespace ICon
 			this->buffer.reserve( 1024*512 );
 			unsigned long long typeSize = Binary::Type::Get( this->buffer, obj );
 			unsigned long long messageSize = Binary::Store( this->buffer, obj, typeSize );
-			this->con->Send( &(this->buffer.front()), messageSize );
+			printf( "\n Send bytes: %llu ", this->con->Send( &(this->buffer.front()), messageSize ) );
 		}
 		else
 		{
@@ -47,18 +47,18 @@ namespace ICon
 				this->buffer.reserve( 1024*512 );
 				unsigned long long typeSize = Binary::Type::Get( this->buffer, obj );
 				
-				std::vector < unsigned char > & receivedMessage = this->con->GetMessageLock();
+				const std::vector < unsigned char > & receivedMessage = this->con->GetMessageLock();
 				
-				if( this->con->IsReferencingToNothing( receivedMessage ) )
+				if( receivedMessage.size() != 0 )
 				{
-					if( Binary::Type::IsValid( this->buffer, obj ) )
+					if( Binary::Type::IsValid( receivedMessage, obj ) )
 					{
-						unsigned long long resotred = Binary::Restore( this->buffer, obj, typeSize );
+						unsigned long long restored = Binary::Restore( receivedMessage, obj, typeSize );
 						if( restored == 0 )
-							ICon::Error::Push( ICon::Error::code::tryingToReceiveToInvalidType );
+							ICon::Error::Push( ICon::Error::Code::failedToReceiveToValidType );
 					}
 					else
-						ICon::Error::Push( ICon::Error::code::tryingToReceiveToInvalidType );
+						ICon::Error::Push( ICon::Error::Code::tryingToReceiveToInvalidType );
 				}
 				else
 					ICon::Error::Push( ICon::Error::Code::failedToGetMessageLockWhichReturnedConstReference );
