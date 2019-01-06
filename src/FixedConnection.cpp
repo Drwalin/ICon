@@ -110,11 +110,11 @@ namespace ICon
 		}
 	}
 	
-	void FixedConnection::ReceiveLock()
+	void FixedConnection::ReceiveLock( bool doNotThrowErrorBecauseOfClosingSequence )
 	{
 		if( this->IsValid() )
 		{
-			if( this->buffers.size() == 0 )
+			while( this->buffers.size() == 0 )
 			{
 				boost::system::error_code ec;
 				unsigned long long availableBytesToReceive = 4096;
@@ -123,24 +123,16 @@ namespace ICon
 				unsigned long long received = this->socket.read_some( boost::asio::buffer( &(this->receiveBuffer[previousBufferSize]), availableBytesToReceive ), ec );
 				this->receiveBuffer.resize( previousBufferSize + received );
 				this->UpdateReceiveBuffer();
-				if( !ec )
+				if( ec )
 				{
-					this->ReceiveLock();
-					return;
-				}
-				else
-				{
-					ICon::Error::Push( ICon::Error::Code::connectionBrokenWhileReceiving );
+					if( doNotThrowErrorBecauseOfClosingSequence == false )
+						ICon::Error::Push( ICon::Error::Code::connectionBrokenWhileReceiving );
 					this->ErrorClose();
 					return;
 				}
 			}
-			else
-			{
-				return;
-			}
 		}
-		else
+		else if( doNotThrowErrorBecauseOfClosingSequence == false )
 			ICon::Error::Push( ICon::Error::Code::tryingToReceiveFromInvalidConnection );
 	}
 	
@@ -288,10 +280,12 @@ namespace ICon
 	{
 		if( this->IsValid() )
 		{
+			this->isValid = false;
 			unsigned zero = 0;
 			this->socket.write_some( boost::asio::buffer( &zero, sizeof(unsigned) ) );
 			this->socket.close();
-			this->isValid = false;
+			this->socket.close();
+			this->socket.close();
 		}
 	}
 	
@@ -299,12 +293,16 @@ namespace ICon
 	{
 		if( this->IsValid() )
 		{
-			boost::system::error_code ec;
 			unsigned zero = 0;
-			this->socket.write_some( boost::asio::buffer( &zero, sizeof(unsigned) ), ec );
+			this->socket.write_some( boost::asio::buffer( &zero, sizeof(unsigned) ) );
+			while( this->IsValid() )
+			{
+				this->buffers.resize( 0 );
+				this->ReceiveLock( true );
+			}
 			this->socket.close();
-			while( this->isValid )
-				this->ReceiveLock();
+			this->socket.close();
+			this->socket.close();
 			this->isValid = false;
 		}
 	}

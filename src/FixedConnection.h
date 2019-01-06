@@ -61,7 +61,7 @@ namespace ICon
 		unsigned Connect( const char * ip, const unsigned short port );
 		
 		void Receive();
-		void ReceiveLock();
+		void ReceiveLock( bool doNotThrowErrorBecauseOfClosingSequence = false );
 		
 		unsigned CountReceivedMessages() const;
 		const std::vector < unsigned char > & GetMessageLock();
