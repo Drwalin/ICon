@@ -25,6 +25,11 @@
 
 namespace ICon
 {
+	bool FixedConnection::IsReferencingToNothing( const std::vector < unsigned char > & var ) const
+	{
+		return &var == &constReferenceBuffer;
+	}
+	
 	unsigned FixedConnection::GetUnreceivedBytes()
 	{
 		if( this->IsValid() )
@@ -109,26 +114,29 @@ namespace ICon
 	{
 		if( this->IsValid() )
 		{
-			unsigned firstNumberOfMessages = this->buffers.size();
-			
-			boost::system::error_code ec;
-			unsigned long long availableBytesToReceive = 4096;
-			unsigned long long previousBufferSize = this->receiveBuffer.size();
-			this->receiveBuffer.resize( previousBufferSize + availableBytesToReceive );
-			unsigned long long received = this->socket.read_some( boost::asio::buffer( &(this->receiveBuffer[previousBufferSize]), availableBytesToReceive ), ec );
-			this->receiveBuffer.resize( previousBufferSize + received );
-			this->UpdateReceiveBuffer();
-			if( !ec )
+			if( this->buffer.size() == 0 )
 			{
-				if( this->buffers.size() <= firstNumberOfMessages )
+				boost::system::error_code ec;
+				unsigned long long availableBytesToReceive = 4096;
+				unsigned long long previousBufferSize = this->receiveBuffer.size();
+				this->receiveBuffer.resize( previousBufferSize + availableBytesToReceive );
+				unsigned long long received = this->socket.read_some( boost::asio::buffer( &(this->receiveBuffer[previousBufferSize]), availableBytesToReceive ), ec );
+				this->receiveBuffer.resize( previousBufferSize + received );
+				this->UpdateReceiveBuffer();
+				if( !ec )
 				{
 					this->ReceiveLock();
+					return;
+				}
+				else
+				{
+					ICon::Error::Push( ICon::Error::Code::connectionBrokenWhileReceiving );
+					this->ErrorClose();
 				}
 			}
 			else
 			{
-				ICon::Error::Push( ICon::Error::Code::connectionBrokenWhileReceiving );
-				this->ErrorClose();
+				return;
 			}
 		}
 		else
@@ -219,12 +227,72 @@ namespace ICon
 		return 0;
 	}
 	
+	unsigned long long FixedConnection::Send( const void ** buffer, const unsigned * bytes, const unsigned buffers )
+	{
+		if( this->IsValid() )
+		{
+			if( buffer != nullptr && bytes != nullptr && buffers > 0 )
+			{
+				unsigned long long sumBytesL = 0, ret;
+				unsigned i;
+				for( i = 0; i < buffers; ++i )
+				{
+					if( buffer[i] == nullptr || bytes[i] == 0 )
+					{
+						ICon::Error::Push( ICon::Error::tryingToSendInvalidBuffersArray );
+						return 0;
+					}
+					sumBytesL += bytes[i];
+				}
+				
+				if( sumBytesL < buffers || subBytesL > (unsigned long long)ICon::FixedConnection::maxBufferSize )
+				{
+					ICon::Error::Push( ICon::Error::tryingToSendInvalidDataSize );
+					return 0;
+				}
+				
+				boost::system::error_code ec;
+				unsigned sumBytes = sumBytesL;
+				
+				ret = this->socket.write_some( boost::asio::buffer( &sumBytes, sizeof(unsigned) ), ec );
+				if( ec || ret != sizeof(unsigned) )
+				{
+					ICon::Error::Push( ICon::Error::connectionClosedByErrorWhileSendingData );
+					this->ErrorClose();
+					return 0;
+				}
+				
+				sumBytesL = 0;
+				ret = 0;
+				for( i = 0; i < buffers; ++i )
+				{
+					sumBytesL += bytes[i];
+					ret += this->socket.write_some( boost::asio::buffer( buffer[i], bytes[i] ), ec );
+					if( ec || ret != sumBytesL )
+					{
+						ICon::Error::Push( ICon::Error::connectionClosedByErrorWhileSendingData );
+						this->ErrorClose();
+						return ret;
+					}
+				}
+				return ret;
+			}
+			else
+				ICon::Error::Push( ICon::Error::tryingToSendInvalidBuffersArray );
+		}
+		else
+			ICon::Error::Push( ICon::Error::tryingToSendDataByInvalidConnectino );
+		return 0;
+	}
+	
 	void FixedConnection::ErrorClose()
 	{
 		if( this->IsValid() )
 		{
-			this->isValid = false;
+			unsigned zero = 0;
+			this->socket.write_some( boost::asio::buffer( &zero, sizeof(unsigned) ) );
 			this->socket.close();
+			this->isValid = false;
 		}
 	}
 	

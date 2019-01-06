@@ -13,36 +13,65 @@
 #ifndef CONNECTION_INL
 #define CONNECTION_INL
 
-//template < typename T >
-void Connection::GetTypeBinary<>( std::vector < unsigned char > & type )
+#include "BinaryType.h"
 
-
-template < typename T >
-void Connection::GetTypeBinary( std::vector < unsigned char > & type )
-
-template < typename T >
-void Connection::GetTypeBinary( std::vector < unsigned char > & type )
+namespace ICon
 {
+	template < typename T >
+	Connection & Connection::operator << ( const T & obj )
+	{
+		if( this->IsValid() )
+		{
+			this->buffer.reserve( 1024*512 );
+			unsigned long long typeSize = Binary::Type::Get( this->buffer, obj );
+			unsigned long long messageSize = Binary::Store( this->buffer, obj, typeSize );
+			this->con->Send( &(this->buffer.front()), messageSize );
+		}
+		else
+		{
+			ICon::Error::Push( ICon::Error::Code::noConnection );
+		}
+		this->buffer.resize( 0 );
+		return *this;
+	}
 	
-	
-	
-	
-}
-
-
-template < typename T >
-bool Connection::IsTypeValid( const std::vector < unsigned char > & type, const unsigned offset )
-{
-	std::vector < unsigned char > other;
-	GetTypeBinary<T>( other );
-	return std::equal( other.begin(), other.end(), type.begin() + offset );
-}
-
-
-
-
-
-
+	template < typename T >
+	Connection & Connection::operator >> ( T & obj )
+	{
+		if( this->IsValid() )
+		{
+			this->con->ReceiveLock();
+			
+			if( this->con->CountReceivedMessages() > 0 )
+			{
+				this->buffer.reserve( 1024*512 );
+				unsigned long long typeSize = Binary::Type::Get( this->buffer, obj );
+				
+				std::vector < unsigned char > & receivedMessage = this->con->GetMessageLock();
+				
+				if( this->con->IsReferencingToNothing( receivedMessage ) )
+				{
+					if( Binary::Type::IsValid( this->buffer, obj ) )
+					{
+						unsigned long long resotred = Binary::Restore( this->buffer, obj, typeSize );
+						if( restored == 0 )
+							ICon::Error::Push( ICon::Error::code::tryingToReceiveToInvalidType );
+					}
+					else
+						ICon::Error::Push( ICon::Error::code::tryingToReceiveToInvalidType );
+				}
+				else
+					ICon::Error::Push( ICon::Error::Code::failedToGetMessageLockWhichReturnedConstReference );
+			}
+			else
+				ICon::Error::Push( ICon::Error::Code::failedToReceiveLock );
+		}
+		else
+			ICon::Error::Push( ICon::Error::Code::noConnection );
+		this->buffer.resize( 0 );
+		return *this;
+	}
+};
 
 #endif
 

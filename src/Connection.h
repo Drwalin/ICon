@@ -21,40 +21,42 @@
 
 #include <memory>
 
-class Connection
+namespace ICon
 {
-private:
-	
-	std::shared_ptr<FixedConnection> con;
-	std::vector < unsigned char > buffer;
-	
-	template < typename T >
-	void GetTypeBinary( std::vector < unsigned char > & type );
-	template < typename T >
-	bool IsTypeValid( const std::vector < unsigned char > & type, const unsigned offset );
-	
-public:
-	
-	bool IsValid();
-	
-	void UpdateReceive();
-	bool IsAnythingToRecevie( bool updateReceive = true );
-	
-	
-	template < typename T >
-	Connection & operator << ( const T & obj );
-	template < typename T >
-	Connection & operator >> ( const T & obj );
-	
-	unsigned write( const void * src, const unsigned size );
-	unsigned read( void * dst, const unsigned size );
-	
-	void SetFixedConnection( std::shared_ptr<FixedConnection> con );
-	std::shared_ptr<FixedConnection> GetFixedConnection();
-	
-	Connection( std::shared_ptr<FixedConnection> con );
-	Connection();
-	~Connection();
+	class Connection
+	{
+	private:
+		
+		std::shared_ptr<FixedConnection> con;
+		std::vector < unsigned char > buffer;
+		
+	public:
+		
+		bool IsValid();
+		
+		void WaitForAnythingToReceive();
+		void UpdateReceive();
+		bool IsAnythingToRecevie( bool updateReceive = true );
+		
+		// stream output operator waits until full message arrive and is of correct type to argument (otherwise it throws an ICon::Error and returns without modifying argument and without poping an message) or connection is lost
+		template < typename T >
+		Connection & operator << ( const T & obj );
+		
+		template < typename T >
+		Connection & operator >> ( T & obj );
+		
+		unsigned long long write( const void * src, const unsigned size );
+		// waits until readed and returns bytes to read
+		unsigned long long read( void * dst, const unsigned size );
+		unsigned long long GetNextBufferSize();
+		
+		void SetFixedConnection( std::shared_ptr<FixedConnection> con );
+		std::shared_ptr<FixedConnection> GetFixedConnection();
+		
+		Connection( std::shared_ptr<FixedConnection> con_ );
+		Connection();
+		~Connection();
+	};
 };
 
 #include "Connection.inl"

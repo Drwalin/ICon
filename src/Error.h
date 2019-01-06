@@ -82,6 +82,19 @@ namespace ICon
 			tryingToReceiveFromInvalidConnection =		23,
 			connectionBrokenWhileReceiving =			24,
 			packetWithInvalidPointerSizeArrived =		25,
+			tryingToReceiveToInvalidType =				26,
+			
+			failedToReceiveLock =					27,
+			failedToRestoreMessage =				28,
+			tryingToSendInvalidBuffersArray =		29,
+			tryingToSendThroughInvalidConnection =	30,
+			tryingToSendThroughInvalidConnection =	31,
+			tryingToReadFromInvalidConnection =		32,
+			failedToReceiveBuffer =					33,
+			receivedInvalidBuffer =					34,
+			tryingToReadFromBufferOfTypeRaw =		35,
+			
+			failedToGetMessageLockWhichReturnedConstReference = 36,
 			
 			unknown =		65565
 		};

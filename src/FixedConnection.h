@@ -52,6 +52,8 @@ namespace ICon
 		
 	public:
 		
+		bool IsReferencingToNothing( const std::vector < unsigned char > & var ) const;
+		
 		const static unsigned maxBufferSize = 2147483647;
 		
 		bool IsValid() const;
@@ -67,6 +69,7 @@ namespace ICon
 		void PopMessage( unsigned count = 1 );
 		
 		unsigned long long Send( const void * buffer, const unsigned bytes );		// return bytes sent
+		unsigned long long Send( const void ** buffer, const unsigned * bytes, const unsigned buffers );		// return bytes sent
 		
 		void ErrorClose();
 		void Close();

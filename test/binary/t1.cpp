@@ -13,17 +13,27 @@ void PrintLN( FILE * f, int offset )
 		fprintf( f, " " );
 }
 
-void Print( FILE * f, const int & val, int offset = 0 )
+void Print( FILE * f, const bool val, int offset = 0 )
+{
+	fprintf( f, "(%i)", val ? "true" : "false" );
+}
+
+void Print( FILE * f, const int val, int offset = 0 )
 {
 	fprintf( f, "(%i)", val );
 }
 
-void Print( FILE * f, const float & val, int offset = 0 )
+void Print( FILE * f, const long long val, int offset = 0 )
+{
+	fprintf( f, "(%lld)", val );
+}
+
+void Print( FILE * f, const float val, int offset = 0 )
 {
 	fprintf( f, "(%f)", val );
 }
 
-void Print( FILE * f, const double & val, int offset = 0 )
+void Print( FILE * f, const double val, int offset = 0 )
 {
 	fprintf( f, "(%f)", (float)val );
 }
@@ -83,7 +93,7 @@ void Print( FILE * f, const std::map<T1,T2> & val, int offset )
 
 int main()
 {
-	std::map < std::vector < std::set < std::vector<std::string> > >, std::map < std::vector<int>, std::set<float> > > val1 =	{ // map
+	std::map < std::vector < std::set < std::vector<std::string> > >, std::map < std::vector<long long>, std::set<float> > > val1 =	{ // map
 																																	{ // map::pair
 																																		{ // vector
 																																			{ // set
@@ -126,11 +136,12 @@ int main()
 																																		{ // map
 																																			{ // map::pair
 																																				{ // vector
-																																					1,
-																																					2,
-																																					3,
-																																					4,
-																																					5
+																																					true,
+																																					false,
+																																					false,
+																																					true,
+																																					true,
+																																					true
 																																				},
 																																				{ // set
 																																					6.0f,
@@ -183,11 +194,15 @@ int main()
 																																		{ // map
 																																			{ // map::pair
 																																				{ // vector
-																																					11,
-																																					12,
-																																					13,
-																																					14,
-																																					15
+																																					false,
+																																					false,
+																																					false,
+																																					true,
+																																					false,
+																																					false,
+																																					true,
+																																					true,
+																																					true
 																																				},
 																																				{ // set
 																																					16.0f,
@@ -240,11 +255,16 @@ int main()
 																																		{ // map
 																																			{ // map::pair
 																																				{ // vector
-																																					21,
-																																					22,
-																																					23,
-																																					24,
-																																					25
+																																					true,
+																																					true,
+																																					true,
+																																					true,
+																																					true,
+																																					false,
+																																					false,
+																																					true,
+																																					false,
+																																					false
 																																				},
 																																				{ // set
 																																					26.0f,
