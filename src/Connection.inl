@@ -25,11 +25,7 @@ namespace ICon
 			this->buffer.clear();
 			this->buffer.reserve( 1024*512 );
 			unsigned long long typeSize = Binary::Type::Get( this->buffer, obj );
-			printf( "\n send::type: " );
-			Print( stderr, this->buffer );
 			unsigned long long messageSize = Binary::Store( this->buffer, obj, typeSize );
-			printf( "\n send::message (%llu): ", messageSize );
-			Print( stderr, this->buffer );
 			this->con->Send( &(this->buffer.front()), messageSize );
 		}
 		else
@@ -52,12 +48,8 @@ namespace ICon
 				this->buffer.clear();
 				this->buffer.reserve( 1024*512 );
 				const unsigned long long typeSize = Binary::Type::Get( this->buffer, obj );
-				printf( "\n recv::type: " );
-				Print( stderr, this->buffer );
 				
 				const std::vector < unsigned char > & receivedMessage = this->con->GetMessageLock();
-				printf( "\n recv::message: " );
-				Print( stderr, receivedMessage );
 				
 				if( receivedMessage.size() != 0 )
 				{

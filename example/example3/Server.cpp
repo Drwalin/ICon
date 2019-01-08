@@ -1,10 +1,11 @@
-	
-//#include "../../src/DeepServer.h"
-//#include "../../src/FixedConnection.h"
 
 #include "Printer.hpp"
 
-#include "../Source.cpp"
+#include "../../src/Connection.h"
+#include "../../src/HighLayerSocket.h"
+#include "../../src/DeepServer.h"
+
+//#include "../Source.cpp"
 
 int main()
 {

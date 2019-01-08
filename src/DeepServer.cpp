@@ -13,6 +13,9 @@
 #ifndef DEEP_SERVER_CPP
 #define DEEP_SERVER_CPP
 
+#include <boost/asio/io_service.hpp>
+#include <boost/asio/ip/tcp.hpp>
+
 #include "DeepServer.h"
 #include "Error.h"
 
@@ -21,20 +24,29 @@
 
 namespace ICon
 {
+	bool DeepServer::IsOpened()
+	{
+		if( this->acceptor == nullptr )
+			return false;
+		if( this->endpoint == nullptr )
+			return false;
+		return this->opened;
+	}
+	
 	unsigned DeepServer::Accept( std::shared_ptr<HighLayerSocket> con )
 	{
-		if( this->opened )
+		if( this->IsOpened() )
 		{
 			if( con )
 			{
 				if( this->isAcceptNoLockRunning.load() == false )
 				{
 					boost::system::error_code ec;
-					this->acceptor.accept( con->socket, ec );
+					((boost::asio::ip::tcp::acceptor*)(this->acceptor))->accept( *((boost::asio::ip::tcp::socket*)(con->socket)), ec );
 					if( !ec )
 					{
 						con->isValid = true;
-						con->socket.io_control( con->command );
+						((boost::asio::ip::tcp::socket*)(con->socket))->io_control( *((boost::asio::socket_base::bytes_readable*)(con->command)) );
 						return ICon::Error::none;
 					}
 					else
@@ -72,16 +84,22 @@ namespace ICon
 	
 	unsigned DeepServer::StartListening( const unsigned short port )
 	{
+		this->Close();
 		this->port = port;
-		this->endpoint = boost::asio::ip::tcp::endpoint( boost::asio::ip::tcp::v4(), port );
-		this->acceptor = boost::asio::ip::tcp::acceptor( *ICon::ioService, this->endpoint );
-		this->opened = true;
-		return ICon::Error::none;
+		this->endpoint = new boost::asio::ip::tcp::endpoint( boost::asio::ip::tcp::v4(), port );
+		this->acceptor = new boost::asio::ip::tcp::acceptor( *((boost::asio::io_service*)(ICon::ioService)), *((boost::asio::ip::tcp::endpoint*)(this->endpoint)) );
+		if( this->endpoint && this->acceptor )
+		{
+			this->opened = true;
+			return ICon::Error::none;
+		}
+		ICon::Error::Push( ICon::Error::Code::failedToAllocateBoostAsioEndpointOrAcceptor, __LINE__, __FILE__ );
+		return ICon::Error::Code::failedToAllocateBoostAsioEndpointOrAcceptor;
 	}
 	
 	void DeepServer::StopListening()
 	{
-		if( this->opened )
+		if( this->IsOpened() )
 		{
 			this->keepAcceptNoLockRunning.store( false );
 			if( this->isAcceptNoLockRunning.load() == true )
@@ -101,22 +119,29 @@ namespace ICon
 	
 	void DeepServer::Close()
 	{
-		if( this->opened )
+		if( this->IsOpened() )
 		{
 			this->StopListening();
-			this->acceptor.close();
-			this->port = 0;
+			((boost::asio::ip::tcp::acceptor*)(this->acceptor))->close();
 			this->opened = false;
 		}
+		this->port = 0;
+		if( this->endpoint )
+			delete ((boost::asio::ip::tcp::endpoint*)(this->endpoint));
+		this->endpoint = nullptr;
+		if( this->acceptor )
+			delete ((boost::asio::ip::tcp::acceptor*)(this->acceptor));
+		this->acceptor = nullptr;
 	}
 	
 	DeepServer::DeepServer() :
-		isAcceptNoLockRunning(false), keepAcceptNoLockRunning(false),
-		acceptor(*ICon::ioService)
+		isAcceptNoLockRunning(false), keepAcceptNoLockRunning(false)
 	{
 		this->self = nullptr;
 		this->port = 0;
 		this->opened = false;
+		this->acceptor = nullptr;
+		this->endpoint = nullptr;
 	}
 	
 	DeepServer::~DeepServer()

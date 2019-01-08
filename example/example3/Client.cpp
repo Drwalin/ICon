@@ -1,9 +1,11 @@
 
-//#include "../../src/FixedConnection.h"
-
 #include "Printer.hpp"
 
-#include "../Source.cpp"
+#include "../../src/Connection.h"
+#include "../../src/HighLayerSocket.h"
+
+//#include "../Source.cpp"
+
 #include <boost/exception/all.hpp>
 
 int main()

@@ -13,12 +13,14 @@
 #ifndef GLOBAL_BOOST_ASIO_CPP
 #define GLOBAL_BOOST_ASIO_CPP
 
+#include <boost/asio/io_service.hpp>
+
 #include "GlobalBoostAsio.h"
 #include "Error.h"
 
 namespace ICon
 {
-	boost::asio::io_service * ioService = nullptr;
+	/*boost::asio::io_service*/ void * ioService = nullptr;
 	
 	unsigned Init()
 	{
@@ -27,7 +29,7 @@ namespace ICon
 			ICon::ioService = new boost::asio::io_service;
 			if( ICon::ioService )
 			{
-				ICon::ioService->run();
+				((boost::asio::io_service*)(ICon::ioService))->run();
 				return 0;
 			}
 		}
@@ -43,7 +45,7 @@ namespace ICon
 	{
 		if( ICon::ioService != nullptr )
 		{
-			delete ICon::ioService;
+			delete ((boost::asio::io_service*)(ICon::ioService));
 		}
 	}
 };

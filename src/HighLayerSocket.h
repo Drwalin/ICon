@@ -16,9 +16,6 @@
 #include <vector>
 #include <array>
 
-#include <boost/asio/basic_stream_socket.hpp>
-#include <boost/asio/ip/tcp.hpp>
-
 #include "GlobalBoostAsio.h"
 #include "Error.h"
 
@@ -35,8 +32,8 @@ namespace ICon
 		
 		bool isValid;
 		
-		boost::asio::ip::tcp::socket socket;
-		boost::asio::socket_base::bytes_readable command;
+		/*boost::asio::ip::tcp::socket*/ void * socket;
+		/*boost::asio::socket_base::bytes_readable*/ void * command;
 		
 		std::vector < std::vector < unsigned char > > buffers;
 		std::vector < unsigned char > receiveBuffer;

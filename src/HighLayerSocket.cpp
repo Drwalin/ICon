@@ -13,8 +13,10 @@
 #ifndef HIGH_LAYER_SOCKET_CPP
 #define HIGH_LAYER_SOCKET_CPP
 
-#include <boost/asio/write.hpp>
+#include <boost/asio/basic_stream_socket.hpp>
+#include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/buffer.hpp>
+#include <boost/asio/write.hpp>
 
 #include "GlobalBoostAsio.h"
 #include "HighLayerSocket.h"
@@ -34,27 +36,31 @@ namespace ICon
 	{
 		if( this->IsValid() )
 		{
-			return this->command.get();
+			return ((boost::asio::socket_base::bytes_readable*)(this->command))->get();
 		}
 		return 0;
 	}
 	
 	bool HighLayerSocket::IsValid() const
 	{
+		if( this->socket == nullptr )
+			return false;
+		if( this->command == nullptr )
+			return false;
 		return this->isValid;
 	}
 	
 	unsigned HighLayerSocket::Connect( const char * ip, const unsigned short port )
 	{
 		boost::system::error_code ec;
-		this->socket.connect( boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string(ip), port ), ec );
+		((boost::asio::ip::tcp::socket*)(this->socket))->connect( boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string(ip), port ), ec );
 		if( ec )
 		{
 			ICon::Error::Push( ICon::Error::Code::failedToConnect, __LINE__, __FILE__ );
 			return ICon::Error::Code::failedToConnect;
 		}
 		this->isValid = true;
-		this->socket.io_control( this->command );
+		((boost::asio::ip::tcp::socket*)(this->socket))->io_control( *((boost::asio::socket_base::bytes_readable*)(this->command)) );
 		return ICon::Error::none;
 	}
 	
@@ -93,7 +99,7 @@ namespace ICon
 			{
 				unsigned long long previousBufferSize = this->receiveBuffer.size();
 				this->receiveBuffer.resize( previousBufferSize + availableBytesToReceive );
-				unsigned long long received = this->socket.read_some( boost::asio::buffer( &(this->receiveBuffer[previousBufferSize]), availableBytesToReceive ), ec );
+				unsigned long long received = ((boost::asio::ip::tcp::socket*)(this->socket))->read_some( boost::asio::buffer( &(this->receiveBuffer[previousBufferSize]), availableBytesToReceive ), ec );
 				this->receiveBuffer.resize( previousBufferSize + received );
 				printf( "\n Received: %7llu / %7llu ", received, availableBytesToReceive );
 			}
@@ -120,7 +126,7 @@ namespace ICon
 				unsigned long long availableBytesToReceive = 4096;
 				unsigned long long previousBufferSize = this->receiveBuffer.size();
 				this->receiveBuffer.resize( previousBufferSize + availableBytesToReceive );
-				unsigned long long received = this->socket.read_some( boost::asio::buffer( &(this->receiveBuffer[previousBufferSize]), availableBytesToReceive ), ec );
+				unsigned long long received = ((boost::asio::ip::tcp::socket*)(this->socket))->read_some( boost::asio::buffer( &(this->receiveBuffer[previousBufferSize]), availableBytesToReceive ), ec );
 				this->receiveBuffer.resize( previousBufferSize + received );
 				this->UpdateReceiveBuffer();
 				if( ec )
@@ -196,14 +202,14 @@ namespace ICon
 				{
 					boost::system::error_code ec;
 					unsigned long long ret;
-					ret = this->socket.write_some( boost::asio::buffer( &bytes, sizeof(unsigned) ), ec );
+					ret = ((boost::asio::ip::tcp::socket*)(this->socket))->write_some( boost::asio::buffer( &bytes, sizeof(unsigned) ), ec );
 					if( ec || ret != sizeof(unsigned) )
 					{
 						ICon::Error::Push( ICon::Error::connectionClosedByErrorWhileSendingData, __LINE__, __FILE__ );
 						this->ErrorClose();
 						return 0;
 					}
-					ret = this->socket.write_some( boost::asio::buffer( buffer, bytes ), ec );
+					ret = ((boost::asio::ip::tcp::socket*)(this->socket))->write_some( boost::asio::buffer( buffer, bytes ), ec );
 					if( ec || ret != bytes )
 					{
 						ICon::Error::Push( ICon::Error::connectionClosedByErrorWhileSendingData, __LINE__, __FILE__ );
@@ -249,7 +255,7 @@ namespace ICon
 				boost::system::error_code ec;
 				unsigned sumBytes = sumBytesL;
 				
-				ret = this->socket.write_some( boost::asio::buffer( &sumBytes, sizeof(unsigned) ), ec );
+				ret = ((boost::asio::ip::tcp::socket*)(this->socket))->write_some( boost::asio::buffer( &sumBytes, sizeof(unsigned) ), ec );
 				if( ec || ret != sizeof(unsigned) )
 				{
 					ICon::Error::Push( ICon::Error::connectionClosedByErrorWhileSendingData, __LINE__, __FILE__ );
@@ -262,7 +268,7 @@ namespace ICon
 				for( i = 0; i < buffers; ++i )
 				{
 					sumBytesL += bytes[i];
-					ret += this->socket.write_some( boost::asio::buffer( buffer[i], bytes[i] ), ec );
+					ret += ((boost::asio::ip::tcp::socket*)(this->socket))->write_some( boost::asio::buffer( buffer[i], bytes[i] ), ec );
 					if( ec || ret != sumBytesL )
 					{
 						ICon::Error::Push( ICon::Error::connectionClosedByErrorWhileSendingData, __LINE__, __FILE__ );
@@ -286,10 +292,10 @@ namespace ICon
 		{
 			this->isValid = false;
 			unsigned zero = 0;
-			this->socket.write_some( boost::asio::buffer( &zero, sizeof(unsigned) ) );
-			this->socket.close();
-			this->socket.close();
-			this->socket.close();
+			((boost::asio::ip::tcp::socket*)(this->socket))->write_some( boost::asio::buffer( &zero, sizeof(unsigned) ) );
+			((boost::asio::ip::tcp::socket*)(this->socket))->close();
+			((boost::asio::ip::tcp::socket*)(this->socket))->close();
+			((boost::asio::ip::tcp::socket*)(this->socket))->close();
 		}
 	}
 	
@@ -298,21 +304,22 @@ namespace ICon
 		if( this->IsValid() )
 		{
 			unsigned zero = 0;
-			this->socket.write_some( boost::asio::buffer( &zero, sizeof(unsigned) ) );
+			((boost::asio::ip::tcp::socket*)(this->socket))->write_some( boost::asio::buffer( &zero, sizeof(unsigned) ) );
 			while( this->IsValid() )
 			{
 				this->buffers.resize( 0 );
 				this->ReceiveLock( true );
 			}
-			this->socket.close();
-			this->socket.close();
-			this->socket.close();
+			((boost::asio::ip::tcp::socket*)(this->socket))->close();
+			((boost::asio::ip::tcp::socket*)(this->socket))->close();
+			((boost::asio::ip::tcp::socket*)(this->socket))->close();
 			this->isValid = false;
 		}
 	}
 	
 	HighLayerSocket::HighLayerSocket() :
-			socket(*ICon::ioService)
+			socket( new boost::asio::ip::tcp::socket( *((boost::asio::io_service*)(ICon::ioService)) ) ),
+			command( new boost::asio::socket_base::bytes_readable() )
 	{
 		this->isValid = false;
 	}
@@ -320,6 +327,12 @@ namespace ICon
 	HighLayerSocket::~HighLayerSocket()
 	{
 		this->Close();
+		if( this->socket )
+			delete ((boost::asio::ip::tcp::socket*)(this->socket));
+		this->socket = nullptr;
+		if( this->command )
+			delete ((boost::asio::socket_base::bytes_readable*)(this->command));
+		this->command = nullptr;
 	}
 };
 

@@ -13,11 +13,9 @@
 #ifndef GLOBAL_BOOST_ASIO_H
 #define GLOBAL_BOOST_ASIO_H
 
-#include <boost/asio/io_service.hpp>
-
 namespace ICon
 {
-	extern class boost::asio::io_context * ioService;
+	extern /*boost::asio::io_context*/ void * ioService;
 	
 	unsigned Init();
 	void DeInit();

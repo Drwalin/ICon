@@ -17,9 +17,6 @@
 #include <atomic>
 #include <thread>
 
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/ip/tcp.hpp>
-
 #include "HighLayerSocket.h"
 #include "Error.h"
 
@@ -32,8 +29,8 @@ namespace ICon
 		unsigned short port;
 		bool opened;
 		
-		boost::asio::ip::tcp::endpoint endpoint;
-		boost::asio::ip::tcp::acceptor acceptor;
+		/*boost::asio::ip::tcp::endpoint*/ void * endpoint;
+		/*boost::asio::ip::tcp::acceptor*/ void * acceptor;
 		
 		std::atomic<bool> isAcceptNoLockRunning;
 		std::atomic<bool> keepAcceptNoLockRunning;
@@ -55,6 +52,8 @@ namespace ICon
 		DeepServer();
 		
 	public:
+		
+		bool IsOpened();
 		
 		unsigned Accept( std::shared_ptr<HighLayerSocket> con );
 		

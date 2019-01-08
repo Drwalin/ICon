@@ -153,6 +153,7 @@ namespace ICon
 		case ICon::Error::Code::failedToReceiveToValidType: return "Failed to receive Connection::operator>> to a valid type";
 		
 		case ICon::Error::Code::failedToGetMessageLockWhichReturnedConstReference: return "Failed to HighLayerSocket::GetMessageLock which returned const reference";
+		case ICon::Error::Code::failedToAllocateBoostAsioEndpointOrAcceptor: return "Failed to allocate boost::asio::ip::tcp::endpoint or boost::asio::ip::tcp::acceptor";
 		
 		case ICon::Error::Code::unknown: return "Unknown error";
 		};

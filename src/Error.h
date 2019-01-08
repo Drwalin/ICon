@@ -92,6 +92,7 @@ namespace ICon
 			receivedInvalidBuffer =								0x3004,
 			
 			failedToGetMessageLockWhichReturnedConstReference = 0x4001,
+			failedToAllocateBoostAsioEndpointOrAcceptor =		0x4002,
 			
 			
 			
