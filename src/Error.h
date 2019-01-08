@@ -28,12 +28,14 @@ namespace ICon
 		std::string message;
 		void * ptr;
 		unsigned code;
+		unsigned line;
+		std::string fileName;
 		
 		static void PrintWhenPushed();
 		static void DoNotPrintWhenPushed();
 		
-		static void Push( unsigned code, const std::string & message, void * ptr = nullptr );
-		static void Push( unsigned code );
+		static void Push( unsigned code, unsigned line, std::string fileName, const std::string & message, void * ptr = nullptr );
+		static void Push( unsigned code, unsigned line, std::string fileName );
 		static Error Pop();
 		
 		operator unsigned() const;
@@ -42,7 +44,8 @@ namespace ICon
 		
 		Error & operator = ( const Error & other );
 		
-		Error( unsigned code_, const std::string & message_, void * ptr_ );
+		Error( unsigned code_, unsigned line_, std::string fileName_, const std::string & message_, void * ptr_ );
+		Error( const Error & other );
 		Error();
 		~Error();
 		
@@ -55,48 +58,45 @@ namespace ICon
 		{
 			none =		0,
 			
-			invalidSocket =				1,
-			invalidServer =				2,
-			noConnection =				3,
-			failedToAccept =			4,
-			failedToConnect =			5,
-			invalidIpAddress =			6,
-			invalidBuffer =				7,
-			failedToInitIoService =		8,
-			tryingToInitSecondTime =	9,
+			failedToReceiveToValidType =	0x1001,
+			failedToRestoreMessage =		0x1002,
+			failedToReceiveBuffer =			0x1003,
+			failedToInitIoService =			0x1004,
+			failedToReceiveLock =			0x1005,
+			failedToConnect =				0x1006,
+			failedToAccept =				0x1007,
 			
-			tryingToRunAcceptWhileAcceptNoLockIsRunning =		10,
-			tryingToRunSecondInstancOfAcceptNoLock =			11,
+			tryingToRunAcceptWhileAcceptNoLockIsRunning =		0x2001,
+			tryingToGetBufferFromInvalidHighSocketLayer =		0x2002,
+			tryingToAcceptToUnallocatedHighSocketLayer =		0x2003,
+			tryingToReceiveFromInvalidHighLayerSocket =			0x2004,
+			tryingToSendDataByInvalidHighSocketLayer =			0x2005,
+			tryingToRunSecondInstancOfAcceptNoLock =			0x2006,
+			tryingToSendThorughInvalidConnection =				0x2007,
+			tryingToReceiveFromInvalidConnection =				0x2008,
+			tryingToSendThroughInvalidConnection =				0x2009,
+			tryingToReadFromBufferNotOfTypeRaw =				0x200A,
+			tryingToReadFromInvalidConnection =					0x200B,
+			tryingToDeInintUnexistingContext =					0x200C,
+			tryingToAcceptUsingClosedServer =					0x200D,
+			tryingToPopMoreBuffersThanExist = 					0x200E,
+			tryingToSendInvalidBuffersArray =					0x200F,
+			tryingToSendInvalidDataPointer =					0x2010,
+			tryingToAccessEmptyErrorQueue =						0x2011,
+			tryingToReceiveToInvalidType =						0x2012,
+			tryingToSendInvalidDataSize =						0x2013,
 			
-			tryingToAccessUnexistingBuffer =			12,
-			tryingToDeInintUnexistingContext =			13,
-			tryingToAcceptUsingClosedServer =			14,
-			tryingToAccessEmptyErrorQueue =				15,
-			tryingToPopMoreBuffersThanExist = 			16,
-			tryingToGetBufferFromInvalidSocket =		17,
-			tryingToSendDataByInvalidConnectino =		18,
-			tryingToSendInvalidDataSize =				19,
-			tryingToSendInvalidDataPointer =			20,
-			connectionClosedByErrorWhileSendingData =	21,
-			tryingToAcceptToUnallocatedConnection =		22,
-			tryingToReceiveFromInvalidConnection =		23,
-			connectionBrokenWhileReceiving =			24,
-			packetWithInvalidPointerSizeArrived =		25,
-			tryingToReceiveToInvalidType =				26,
+			highLayerSocketGetMessageReturnedConstReference =	0x3001,
+			connectionClosedByErrorWhileSendingData =			0x3002,
+			connectionBrokenWhileReceiving =					0x3003,
+			receivedInvalidBuffer =								0x3004,
 			
-			failedToReceiveLock =					27,
-			failedToRestoreMessage =				28,
-			tryingToSendInvalidBuffersArray =		29,
-			tryingToSendThroughInvalidConnection =	30,
-			tryingToReadFromInvalidConnection =		31,
-			failedToReceiveBuffer =					32,
-			receivedInvalidBuffer =					33,
-			tryingToReadFromBufferOfTypeRaw =		34,
-			failedToReceiveToValidType =			35,
+			failedToGetMessageLockWhichReturnedConstReference = 0x4001,
 			
-			failedToGetMessageLockWhichReturnedConstReference = 36,
 			
-			unknown =		65565
+			
+			
+			unknown =		0xFFFF
 		};
 	};
 	

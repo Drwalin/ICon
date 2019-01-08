@@ -93,8 +93,44 @@ void Print( FILE * f, const std::map<T1,T2> & val, int offset )
 
 int main()
 {
+			std::map < std::vector<int>, std::vector<std::string> > val1 =
+			{
+				{
+					{
+						1, 2, 3, 4, 5, 6, 7, 8
+					},
+					{
+						"a_1", "b_1", "c_1"
+					}
+				},
+				{
+					{
+						11, 12, 13, 14, 15, 16, 17, 18
+					},
+					{
+						"a_2", "b_2", "c_2"
+					}
+				},
+				{
+					{
+						21, 22, 23, 24, 25, 26, 27, 28
+					},
+					{
+						"a_3", "b_3", "c_3"
+					}
+				},
+				{
+					{
+						31, 32, 33, 34, 35, 36, 37, 38
+					},
+					{
+						"a_4", "b_4", "c_4"
+					}
+				},
+			};
+	
 	std::map < std::vector < std::set < std::vector<std::string> > >, std::map < std::vector<int>, std::set<double> > > val2;
-	std::map < std::vector < std::set < std::vector<std::string> > >, std::map < std::vector<long long>, std::set<float> > > val1 =	{ // map
+	std::map < std::vector < std::set < std::vector<std::string> > >, std::map < std::vector<long long>, std::set<float> > > val3 =	{ // map
 																																	{ // map::pair
 																																		{ // vector
 																																			{ // set
@@ -302,7 +338,7 @@ int main()
 	std::vector < unsigned char > data;
 	
 	data.reserve( 1024*256 );
-	Binary::Store( data, val1 );
+	Binary::Store( data, val1, 311 );
 	
 	val1 = decltype(val1)();
 	
@@ -312,7 +348,7 @@ int main()
 	
 	try
 	{
-		restored = Binary::Restore( data, val1 );
+		restored = Binary::Restore( data, val1, 311 );
 	}
 	catch( const std::exception & e )
 	{
@@ -327,8 +363,12 @@ int main()
 	
 	
 	
+	
+	
 	fclose( f1 );
 	fclose( f2 );
+	
+	
 	
 	
 	

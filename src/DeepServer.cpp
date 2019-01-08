@@ -39,25 +39,25 @@ namespace ICon
 					}
 					else
 					{
-						ICon::Error::Push( ICon::Error::Code::failedToAccept );
+						ICon::Error::Push( ICon::Error::Code::failedToAccept, __LINE__, __FILE__ );
 						return ICon::Error::Code::failedToAccept;
 					}
 				}
 				else
 				{
-					ICon::Error::Push( ICon::Error::tryingToRunAcceptWhileAcceptNoLockIsRunning );
+					ICon::Error::Push( ICon::Error::tryingToRunAcceptWhileAcceptNoLockIsRunning, __LINE__, __FILE__ );
 					return ICon::Error::tryingToRunAcceptWhileAcceptNoLockIsRunning;
 				}
 			}
 			else
 			{
-				ICon::Error::Push( ICon::Error::tryingToAcceptToUnallocatedConnection );
-				return ICon::Error::tryingToAcceptToUnallocatedConnection;
+				ICon::Error::Push( ICon::Error::tryingToAcceptToUnallocatedHighSocketLayer, __LINE__, __FILE__ );
+				return ICon::Error::tryingToAcceptToUnallocatedHighSocketLayer;
 			}
 		}
 		else
 		{
-			ICon::Error::Push( ICon::Error::tryingToAcceptUsingClosedServer );
+			ICon::Error::Push( ICon::Error::tryingToAcceptUsingClosedServer, __LINE__, __FILE__ );
 			return ICon::Error::tryingToAcceptUsingClosedServer;
 		}
 		return ICon::Error::unknown;

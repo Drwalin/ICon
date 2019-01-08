@@ -68,17 +68,17 @@ namespace ICon
 				}
 				else
 				{
-					ICon::Error::Push( ICon::Error::tryingToAcceptToUnallocatedConnection );
+					ICon::Error::Push( ICon::Error::tryingToAcceptToUnallocatedHighSocketLayer, __LINE__, __FILE__ );
 				}
 			}
 			else
 			{
-				ICon::Error::Push( ICon::Error::tryingToRunSecondInstancOfAcceptNoLock );
+				ICon::Error::Push( ICon::Error::tryingToRunSecondInstancOfAcceptNoLock, __LINE__, __FILE__ );
 			}
 		}
 		else
 		{
-			ICon::Error::Push( ICon::Error::tryingToAcceptUsingClosedServer );
+			ICon::Error::Push( ICon::Error::tryingToAcceptUsingClosedServer, __LINE__, __FILE__ );
 		}
 	}
 	
@@ -95,12 +95,12 @@ namespace ICon
 			}
 			else
 			{
-				ICon::Error::Push( ICon::Error::tryingToRunSecondInstancOfAcceptNoLock );
+				ICon::Error::Push( ICon::Error::tryingToRunSecondInstancOfAcceptNoLock, __LINE__, __FILE__ );
 			}
 		}
 		else
 		{
-			ICon::Error::Push( ICon::Error::tryingToAcceptUsingClosedServer );
+			ICon::Error::Push( ICon::Error::tryingToAcceptUsingClosedServer, __LINE__, __FILE__ );
 		}
 	}
 };

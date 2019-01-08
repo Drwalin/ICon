@@ -74,7 +74,7 @@ namespace ICon
 		}
 		else
 		{
-			ICon::Error::Push( ICon::Error::Code::tryingToSendThroughInvalidConnection );
+			ICon::Error::Push( ICon::Error::Code::tryingToSendThroughInvalidConnection, __LINE__, __FILE__ );
 		}
 		this->buffer.resize( 0 );
 		return 0;
@@ -108,11 +108,11 @@ namespace ICon
 					return this->read( dst, size );
 				}
 				else
-					ICon::Error::Push( ICon::Error::Code::tryingToReadFromBufferOfTypeRaw );
+					ICon::Error::Push( ICon::Error::Code::tryingToReadFromBufferNotOfTypeRaw, __LINE__, __FILE__ );
 			}	
 		}
 		else
-			ICon::Error::Push( ICon::Error::Code::tryingToReadFromInvalidConnection );
+			ICon::Error::Push( ICon::Error::Code::tryingToReadFromInvalidConnection, __LINE__, __FILE__ );
 		return 0;
 	}
 	
@@ -133,13 +133,13 @@ namespace ICon
 					return messageSize - typeSize;
 				}
 				else
-					ICon::Error::Push( ICon::Error::Code::receivedInvalidBuffer );
+					ICon::Error::Push( ICon::Error::Code::receivedInvalidBuffer, __LINE__, __FILE__ );
 			}
 			else
-				ICon::Error::Push( ICon::Error::Code::failedToReceiveBuffer );
+				ICon::Error::Push( ICon::Error::Code::failedToReceiveBuffer, __LINE__, __FILE__ );
 		}
 		else
-			ICon::Error::Push( ICon::Error::Code::tryingToReadFromInvalidConnection );
+			ICon::Error::Push( ICon::Error::Code::tryingToReadFromInvalidConnection, __LINE__, __FILE__ );
 		return 0;
 	}
 	

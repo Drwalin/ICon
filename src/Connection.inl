@@ -22,14 +22,19 @@ namespace ICon
 	{
 		if( this->IsValid() )
 		{
+			this->buffer.clear();
 			this->buffer.reserve( 1024*512 );
 			unsigned long long typeSize = Binary::Type::Get( this->buffer, obj );
+			printf( "\n send::type: " );
+			Print( stderr, this->buffer );
 			unsigned long long messageSize = Binary::Store( this->buffer, obj, typeSize );
-			printf( "\n Send bytes: %llu ", this->con->Send( &(this->buffer.front()), messageSize ) );
+			printf( "\n send::message (%llu): ", messageSize );
+			Print( stderr, this->buffer );
+			this->con->Send( &(this->buffer.front()), messageSize );
 		}
 		else
 		{
-			ICon::Error::Push( ICon::Error::Code::noConnection );
+			ICon::Error::Push( ICon::Error::Code::tryingToSendThorughInvalidConnection, __LINE__, __FILE__ );
 		}
 		this->buffer.resize( 0 );
 		return *this;
@@ -44,30 +49,36 @@ namespace ICon
 			
 			if( this->con->CountReceivedMessages() > 0 )
 			{
+				this->buffer.clear();
 				this->buffer.reserve( 1024*512 );
-				unsigned long long typeSize = Binary::Type::Get( this->buffer, obj );
+				const unsigned long long typeSize = Binary::Type::Get( this->buffer, obj );
+				printf( "\n recv::type: " );
+				Print( stderr, this->buffer );
 				
 				const std::vector < unsigned char > & receivedMessage = this->con->GetMessageLock();
+				printf( "\n recv::message: " );
+				Print( stderr, receivedMessage );
 				
 				if( receivedMessage.size() != 0 )
 				{
-					if( Binary::Type::IsValid( receivedMessage, obj ) )
+					if( Binary::Type::IsValid( receivedMessage, obj, 0 ) )
 					{
 						unsigned long long restored = Binary::Restore( receivedMessage, obj, typeSize );
 						if( restored == 0 )
-							ICon::Error::Push( ICon::Error::Code::failedToReceiveToValidType );
+							ICon::Error::Push( ICon::Error::Code::failedToReceiveToValidType, __LINE__, __FILE__ );
+						this->con->PopMessage();
 					}
 					else
-						ICon::Error::Push( ICon::Error::Code::tryingToReceiveToInvalidType );
+						ICon::Error::Push( ICon::Error::Code::tryingToReceiveToInvalidType, __LINE__, __FILE__ );
 				}
 				else
-					ICon::Error::Push( ICon::Error::Code::failedToGetMessageLockWhichReturnedConstReference );
+					ICon::Error::Push( ICon::Error::Code::failedToGetMessageLockWhichReturnedConstReference, __LINE__, __FILE__ );
 			}
 			else
-				ICon::Error::Push( ICon::Error::Code::failedToReceiveLock );
+				ICon::Error::Push( ICon::Error::Code::failedToReceiveLock, __LINE__, __FILE__ );
 		}
 		else
-			ICon::Error::Push( ICon::Error::Code::noConnection );
+			ICon::Error::Push( ICon::Error::Code::tryingToReceiveFromInvalidConnection, __LINE__, __FILE__ );
 		this->buffer.resize( 0 );
 		return *this;
 	}

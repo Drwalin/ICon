@@ -35,7 +35,7 @@ namespace ICon
 		{
 			return true;
 		}
-		ICon::Error::Push( ICon::Error::Code::failedToInitIoService );
+		ICon::Error::Push( ICon::Error::Code::failedToInitIoService, __LINE__, __FILE__ );
 		return false;
 	}
 	

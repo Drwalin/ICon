@@ -61,26 +61,19 @@ namespace Binary
 			std::vector < unsigned char > temp;
 			temp.reserve( 64 );
 			unsigned long long size = Get( temp, src, 0 );
-			return memcmp( &(temp.front()), &(type.front()), size ) == 0;
+			
+			if( type.size() < size + offset )
+				return false;
+			
+			unsigned char *b = (unsigned char*)(&(type[offset])), *a = (unsigned char*)(&(temp[0])), *enda = a + size;
+			for( ; a < enda && *a == *b; ++a, ++b );
+			if( a == enda )
+				return true;
+			return false;
 		}
 	};
 	
 	
-	
-	// internal type
-	
-	template < typename T >
-	unsigned long long Store( std::vector < unsigned char > & dst, const T src, unsigned long long offset )
-	{
-		if( std::is_fundamental<T>::value )
-		{
-			if( offset + sizeof(src) > dst.size() )
-				dst.resize( offset + sizeof(src) );
-			memmove( &(dst.front()) + offset, &src, sizeof(src) );
-			return offset + sizeof(src);
-		}
-		return 0;
-	}
 	
 	
 	
@@ -137,27 +130,9 @@ namespace Binary
 	
 	
 	
-	// internal type
-	
-	template < typename T >
-	unsigned long long Restore( const std::vector < unsigned char > & src, T & dst, unsigned long long offset )
-	{
-		if( std::is_fundamental<T>::value )
-		{
-			if( src.size() >= offset + sizeof(dst) )
-			{
-				memmove( &dst, &(src.front()) + offset, sizeof(dst) );
-				return offset + sizeof(dst);
-			}
-		}
-		return 0;
-	}
-	
-	
-	
 	// std::vector
 	template < typename T >
-	unsigned long long Restore( std::vector < unsigned char > & src, std::vector < T > & dst, unsigned long long offset )
+	unsigned long long Restore( const std::vector < unsigned char > & src, std::vector < T > & dst, unsigned long long offset )
 	{
 		if( src.size() >= offset + sizeof(Binary::Type::NumberOfElements) )
 		{
@@ -171,15 +146,18 @@ namespace Binary
 				{
 					tempOffset = Binary::Restore( src, dst[i], tempOffset );
 				}
+				printf( " (std::map->1:%llu)", tempOffset );
 				return tempOffset;
 			}
+			printf( " (std::map->2:0)" );
 		}
+		printf( " (std::map->3:0)" );
 		return 0;
 	}
 	
 	// std::map
 	template < typename T1, typename T2  >
-	unsigned long long Restore( std::vector < unsigned char > & src, std::map < T1, T2 > & dst, unsigned long long offset )
+	unsigned long long Restore( const std::vector < unsigned char > & src, std::map < T1, T2 > & dst, unsigned long long offset )
 	{
 		if( src.size() >= offset + sizeof(Binary::Type::NumberOfElements) )
 		{
@@ -194,23 +172,27 @@ namespace Binary
 					tempOffset = Binary::Restore( src, temp1, tempOffset );
 					if( tempOffset == 0 )
 					{
+						printf( " (std::map->1:0)" );
 						break;
 					}
 					tempOffset = Binary::Restore( src, dst[temp1], tempOffset );
 					if( tempOffset == 0 )
 					{
+						printf( " (std::map->2:0)" );
 						break;
 					}
 				}
+				printf( " (std::map->3:%llu)", tempOffset );
 				return tempOffset;
 			}
 		}
+		printf( " (std::map->4:0)" );
 		return 0;
 	}
 	
 	// std::set
 	template < typename T >
-	unsigned long long Restore( std::vector < unsigned char > & src, std::set < T > & dst, unsigned long long offset )
+	unsigned long long Restore( const std::vector < unsigned char > & src, std::set < T > & dst, unsigned long long offset )
 	{
 		if( src.size() >= offset + sizeof(Binary::Type::NumberOfElements) )
 		{

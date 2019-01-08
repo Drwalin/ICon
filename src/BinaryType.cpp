@@ -170,16 +170,33 @@ namespace Binary
 	
 	
 	
-	// internal type
 	
-	unsigned long long Store( std::vector < unsigned char > & dst, const bool src, unsigned long long offset )
-	{
-		if( offset + 1 > dst.size() )
-			dst.resize( offset + 1 );
-		dst[offset] = src ? 255 : 0;
-		return offset + 1;
+	
+	// internal types
+	
+#define STORE_INTERNAL_TYPE_MACRO_TEMPLATE( TYPE )																	\
+	unsigned long long Store( std::vector < unsigned char > & dst, const TYPE src, unsigned long long offset )		\
+	{																												\
+		if( offset + sizeof(src) > dst.size() )																		\
+			dst.resize( offset + sizeof(src) );																		\
+		memmove( &(dst.front()) + offset, &src, sizeof(src) );														\
+		return offset + sizeof(src);																				\
 	}
 	
+	STORE_INTERNAL_TYPE_MACRO_TEMPLATE( float );
+	STORE_INTERNAL_TYPE_MACRO_TEMPLATE( double );
+	STORE_INTERNAL_TYPE_MACRO_TEMPLATE( long double );
+	
+	STORE_INTERNAL_TYPE_MACRO_TEMPLATE( char );
+	STORE_INTERNAL_TYPE_MACRO_TEMPLATE( short );
+	STORE_INTERNAL_TYPE_MACRO_TEMPLATE( int );
+	STORE_INTERNAL_TYPE_MACRO_TEMPLATE( long long );
+	STORE_INTERNAL_TYPE_MACRO_TEMPLATE( unsigned char );
+	STORE_INTERNAL_TYPE_MACRO_TEMPLATE( unsigned short );
+	STORE_INTERNAL_TYPE_MACRO_TEMPLATE( unsigned int );
+	STORE_INTERNAL_TYPE_MACRO_TEMPLATE( unsigned long long );
+	
+#undef STORE_INTERNAL_TYPE_MACRO_TEMPLATE
 	
 	
 	// std::string
@@ -199,6 +216,35 @@ namespace Binary
 	
 	// internal types
 	
+#define RESTORE_INTERNAL_TYPE_MACRO_TEMPLATE( TYPE )																	\
+	unsigned long long Restore( const std::vector < unsigned char > & src, TYPE & dst, unsigned long long offset )		\
+	{																													\
+		if( src.size() >= offset + sizeof(dst) )																		\
+		{																												\
+			memmove( &dst, &(src.front()) + offset, sizeof(dst) );														\
+			printf( " (fundamental->1:%llu)", offset + sizeof(dst) );											\
+			return offset + sizeof(dst);																				\
+		}																												\
+		printf( " (fundamental->2:0)" );																		\
+		return 0;																										\
+	}
+	
+	RESTORE_INTERNAL_TYPE_MACRO_TEMPLATE( float );
+	RESTORE_INTERNAL_TYPE_MACRO_TEMPLATE( double );
+	RESTORE_INTERNAL_TYPE_MACRO_TEMPLATE( long double );
+	
+	RESTORE_INTERNAL_TYPE_MACRO_TEMPLATE( char );
+	RESTORE_INTERNAL_TYPE_MACRO_TEMPLATE( short );
+	RESTORE_INTERNAL_TYPE_MACRO_TEMPLATE( int );
+	RESTORE_INTERNAL_TYPE_MACRO_TEMPLATE( long long );
+	RESTORE_INTERNAL_TYPE_MACRO_TEMPLATE( unsigned char );
+	RESTORE_INTERNAL_TYPE_MACRO_TEMPLATE( unsigned short );
+	RESTORE_INTERNAL_TYPE_MACRO_TEMPLATE( unsigned int );
+	RESTORE_INTERNAL_TYPE_MACRO_TEMPLATE( unsigned long long );
+	
+#undef RESTORE_INTERNAL_TYPE_MACRO_TEMPLATE
+	
+	
 	unsigned long long Restore( const std::vector < unsigned char > & src, bool & dst, unsigned long long offset )
 	{
 		if( src.size() >= offset + sizeof(dst) )
@@ -208,7 +254,9 @@ namespace Binary
 			else
 				dst = false;
 			return offset + 1;
+			printf( " (bool->2:%llu)", offset + 1 );
 		}
+		printf( " (bool->2:0)" );
 		return 0;
 	}
 	
@@ -220,8 +268,10 @@ namespace Binary
 				dst = true;
 			else
 				dst = false;
+			printf( " (std::vector<bool>::reference->2:%llu)", offset + 1 );
 			return offset + 1;
 		}
+		printf( " (std::vector<bool>::reference->2:0)" );
 		return 0;
 	}
 	
@@ -239,9 +289,12 @@ namespace Binary
 				dst.resize( elements+1 );
 				dst[elements] = 0;
 				memmove( &(dst.front()), &(src.front()) + offset + sizeof(Binary::Type::NumberOfElements), elements );
+				printf( " (std::string->1:%llu)", offset + sizeof(Binary::Type::NumberOfElements) + elements );
 				return offset + sizeof(Binary::Type::NumberOfElements) + elements;
 			}
+			printf( " (std::string->2:0)" );
 		}
+		printf( " (std::string->3:0)" );
 		return 0;
 	}
 };

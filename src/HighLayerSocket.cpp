@@ -50,7 +50,7 @@ namespace ICon
 		this->socket.connect( boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string(ip), port ), ec );
 		if( ec )
 		{
-			ICon::Error::Push( ICon::Error::Code::failedToConnect );
+			ICon::Error::Push( ICon::Error::Code::failedToConnect, __LINE__, __FILE__ );
 			return ICon::Error::Code::failedToConnect;
 		}
 		this->isValid = true;
@@ -99,14 +99,14 @@ namespace ICon
 			}
 			else
 			{
-				//printf( "\n No bytes available" );
+				printf( "\n No bytes available" );
 			}
 			
 			this->UpdateReceiveBuffer();
 		}
 		else
 		{
-			ICon::Error::Push( ICon::Error::Code::tryingToReceiveFromInvalidConnection );
+			ICon::Error::Push( ICon::Error::Code::tryingToReceiveFromInvalidHighLayerSocket, __LINE__, __FILE__ );
 		}
 	}
 	
@@ -126,14 +126,14 @@ namespace ICon
 				if( ec )
 				{
 					if( doNotThrowErrorBecauseOfClosingSequence == false )
-						ICon::Error::Push( ICon::Error::Code::connectionBrokenWhileReceiving );
+						ICon::Error::Push( ICon::Error::Code::connectionBrokenWhileReceiving, __LINE__, __FILE__ );
 					this->ErrorClose();
 					return;
 				}
 			}
 		}
 		else if( doNotThrowErrorBecauseOfClosingSequence == false )
-			ICon::Error::Push( ICon::Error::Code::tryingToReceiveFromInvalidConnection );
+			ICon::Error::Push( ICon::Error::Code::tryingToReceiveFromInvalidHighLayerSocket, __LINE__, __FILE__ );
 	}
 	
 	unsigned HighLayerSocket::CountReceivedMessages() const
@@ -155,7 +155,11 @@ namespace ICon
 				return this->buffers.front();
 			}
 		}
-		ICon::Error::Push( ICon::Error::tryingToGetBufferFromInvalidSocket );
+		else
+		{
+			ICon::Error::Push( ICon::Error::tryingToGetBufferFromInvalidHighSocketLayer, __LINE__, __FILE__ );
+		}
+		ICon::Error::Push( ICon::Error::highLayerSocketGetMessageReturnedConstReference, __LINE__, __FILE__ );
 		return this->constReferenceBuffer;
 	}
 	
@@ -165,20 +169,20 @@ namespace ICon
 		{
 			return this->buffers.front();
 		}
-		ICon::Error::Push( ICon::Error::tryingToAccessUnexistingBuffer );
+		ICon::Error::Push( ICon::Error::highLayerSocketGetMessageReturnedConstReference, __LINE__, __FILE__ );
 		return this->constReferenceBuffer;
 	}
 	
 	void HighLayerSocket::PopMessage( unsigned count )
 	{
-		if( this->buffers.size() > count )
+		if( this->buffers.size() >= count )
 		{
 			this->buffers.erase( this->buffers.begin() );
 		}
 		else
 		{
 			this->buffers.clear();
-			ICon::Error::Push( ICon::Error::tryingToPopMoreBuffersThanExist );
+			ICon::Error::Push( ICon::Error::tryingToPopMoreBuffersThanExist, __LINE__, __FILE__ );
 		}
 	}
 	
@@ -195,26 +199,26 @@ namespace ICon
 					ret = this->socket.write_some( boost::asio::buffer( &bytes, sizeof(unsigned) ), ec );
 					if( ec || ret != sizeof(unsigned) )
 					{
-						ICon::Error::Push( ICon::Error::connectionClosedByErrorWhileSendingData );
+						ICon::Error::Push( ICon::Error::connectionClosedByErrorWhileSendingData, __LINE__, __FILE__ );
 						this->ErrorClose();
 						return 0;
 					}
 					ret = this->socket.write_some( boost::asio::buffer( buffer, bytes ), ec );
 					if( ec || ret != bytes )
 					{
-						ICon::Error::Push( ICon::Error::connectionClosedByErrorWhileSendingData );
+						ICon::Error::Push( ICon::Error::connectionClosedByErrorWhileSendingData, __LINE__, __FILE__ );
 						this->ErrorClose();
 					}
 					return ret;
 				}
 				else
-					ICon::Error::Push( ICon::Error::tryingToSendInvalidDataSize );
+					ICon::Error::Push( ICon::Error::tryingToSendInvalidDataSize, __LINE__, __FILE__ );
 			}
 			else
-				ICon::Error::Push( ICon::Error::tryingToSendInvalidDataPointer );
+				ICon::Error::Push( ICon::Error::tryingToSendInvalidDataPointer, __LINE__, __FILE__ );
 		}
 		else
-			ICon::Error::Push( ICon::Error::tryingToSendDataByInvalidConnectino );
+			ICon::Error::Push( ICon::Error::tryingToSendDataByInvalidHighSocketLayer, __LINE__, __FILE__ );
 		return 0;
 	}
 	
@@ -230,7 +234,7 @@ namespace ICon
 				{
 					if( buffer[i] == nullptr || bytes[i] == 0 )
 					{
-						ICon::Error::Push( ICon::Error::tryingToSendInvalidBuffersArray );
+						ICon::Error::Push( ICon::Error::tryingToSendInvalidBuffersArray, __LINE__, __FILE__ );
 						return 0;
 					}
 					sumBytesL += bytes[i];
@@ -238,7 +242,7 @@ namespace ICon
 				
 				if( sumBytesL < buffers || sumBytesL > (unsigned long long)ICon::HighLayerSocket::maxBufferSize )
 				{
-					ICon::Error::Push( ICon::Error::tryingToSendInvalidDataSize );
+					ICon::Error::Push( ICon::Error::tryingToSendInvalidDataSize, __LINE__, __FILE__ );
 					return 0;
 				}
 				
@@ -248,7 +252,7 @@ namespace ICon
 				ret = this->socket.write_some( boost::asio::buffer( &sumBytes, sizeof(unsigned) ), ec );
 				if( ec || ret != sizeof(unsigned) )
 				{
-					ICon::Error::Push( ICon::Error::connectionClosedByErrorWhileSendingData );
+					ICon::Error::Push( ICon::Error::connectionClosedByErrorWhileSendingData, __LINE__, __FILE__ );
 					this->ErrorClose();
 					return 0;
 				}
@@ -261,7 +265,7 @@ namespace ICon
 					ret += this->socket.write_some( boost::asio::buffer( buffer[i], bytes[i] ), ec );
 					if( ec || ret != sumBytesL )
 					{
-						ICon::Error::Push( ICon::Error::connectionClosedByErrorWhileSendingData );
+						ICon::Error::Push( ICon::Error::connectionClosedByErrorWhileSendingData, __LINE__, __FILE__ );
 						this->ErrorClose();
 						return ret;
 					}
@@ -269,10 +273,10 @@ namespace ICon
 				return ret;
 			}
 			else
-				ICon::Error::Push( ICon::Error::tryingToSendInvalidBuffersArray );
+				ICon::Error::Push( ICon::Error::tryingToSendInvalidBuffersArray, __LINE__, __FILE__ );
 		}
 		else
-			ICon::Error::Push( ICon::Error::tryingToSendDataByInvalidConnectino );
+			ICon::Error::Push( ICon::Error::tryingToSendDataByInvalidHighSocketLayer, __LINE__, __FILE__ );
 		return 0;
 	}
 	
