@@ -20,7 +20,7 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 
-#include "FixedConnection.h"
+#include "HighLayerSocket.h"
 #include "Error.h"
 
 namespace ICon
@@ -41,13 +41,13 @@ namespace ICon
 		std::shared_ptr<DeepServer> self;
 		
 		template < typename CallBackType, typename... Args >
-		friend void _DeepServer_AcceptNoLock_ThreadFunction_OneAccept( std::shared_ptr<DeepServer> server, std::shared_ptr<FixedConnection> con, CallBackType callBackFunction, Args... args );;
+		friend void _DeepServer_AcceptNoLock_ThreadFunction_OneAccept( std::shared_ptr<DeepServer> server, std::shared_ptr<HighLayerSocket> con, CallBackType callBackFunction, Args... args );;
 		
 		template < typename CallBackType, typename... Args >
 		friend void _DeepServer_AcceptNoLock_ThreadFunction_OneAccept( std::shared_ptr<DeepServer> server, CallBackType callBackFunction, Args... args );
 		
 		template < typename CallBackType, typename... Args >
-		void AcceptNoLockRunned( std::shared_ptr<FixedConnection> con, CallBackType callBackFunction, Args... args );
+		void AcceptNoLockRunned( std::shared_ptr<HighLayerSocket> con, CallBackType callBackFunction, Args... args );
 		
 		template < typename CallBackType, typename... Args >
 		void AcceptNoLockRunned( CallBackType callBackFunction, Args... args );
@@ -56,11 +56,11 @@ namespace ICon
 		
 	public:
 		
-		unsigned Accept( std::shared_ptr<FixedConnection> con );
+		unsigned Accept( std::shared_ptr<HighLayerSocket> con );
 		
 		// only one istance of AcceptNoLock can be running at one time
 		template < typename CallBackType, typename... Args >
-		void AcceptNoLock( std::shared_ptr<FixedConnection> con, CallBackType callBackFunction, Args... args );
+		void AcceptNoLock( std::shared_ptr<HighLayerSocket> con, CallBackType callBackFunction, Args... args );
 		
 		template < typename CallBackType, typename... Args >
 		void AcceptNoLock( CallBackType callBackFunction, Args... args );
@@ -77,7 +77,7 @@ namespace ICon
 	};
 	
 	template < typename CallBackType, typename... Args >
-	void _DeepServer_AcceptNoLock_ThreadFunction_OneAccept( std::shared_ptr<DeepServer> server, std::shared_ptr<FixedConnection> con, CallBackType callBackFunction, Args... args );
+	void _DeepServer_AcceptNoLock_ThreadFunction_OneAccept( std::shared_ptr<DeepServer> server, std::shared_ptr<HighLayerSocket> con, CallBackType callBackFunction, Args... args );
 	
 	template < typename CallBackType, typename... Args >
 	void _DeepServer_AcceptNoLock_ThreadFunction_OneAccept( std::shared_ptr<DeepServer> server, CallBackType callBackFunction, Args... args );

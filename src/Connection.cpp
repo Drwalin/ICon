@@ -143,12 +143,12 @@ namespace ICon
 		return 0;
 	}
 	
-	void Connection::SetFixedConnection( std::shared_ptr<FixedConnection> con )
+	void Connection::SetHighLayerSocket( std::shared_ptr<HighLayerSocket> con )
 	{
 		this->con = con;
 	}
 	
-	std::shared_ptr<FixedConnection> Connection::GetFixedConnection()
+	std::shared_ptr<HighLayerSocket> Connection::GetHighLayerSocket()
 	{
 		return this->con;
 	}
@@ -161,14 +161,14 @@ namespace ICon
 		}
 	}
 	
-	Connection::Connection( std::shared_ptr<FixedConnection> con_ ) :
+	Connection::Connection( std::shared_ptr<HighLayerSocket> con_ ) :
 		con(con_)
 	{
 		this->buffer.reserve( 1024*512 );
 	}
 	
 	Connection::Connection() :
-		con(new FixedConnection())
+		con(new HighLayerSocket())
 	{
 		this->buffer.reserve( 1024*512 );
 	}

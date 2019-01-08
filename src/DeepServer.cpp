@@ -21,7 +21,7 @@
 
 namespace ICon
 {
-	unsigned DeepServer::Accept( std::shared_ptr<FixedConnection> con )
+	unsigned DeepServer::Accept( std::shared_ptr<HighLayerSocket> con )
 	{
 		if( this->opened )
 		{
@@ -89,7 +89,7 @@ namespace ICon
 				std::this_thread::sleep_for( std::chrono::milliseconds( 5 ) );
 				if( this->isAcceptNoLockRunning.load() == true )
 				{
-					std::shared_ptr<FixedConnection> closingConnection( new FixedConnection );
+					std::shared_ptr<HighLayerSocket> closingConnection( new HighLayerSocket );
 					if( closingConnection->Connect( "127.0.0.1", this->port ) == ICon::Error::none )
 					{
 						closingConnection->Close();

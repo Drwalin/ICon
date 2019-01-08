@@ -13,7 +13,7 @@
 #ifndef CONNECTION_H
 #define CONNECTION_H
 
-#include "FixedConnection.h"
+#include "HighLayerSocket.h"
 
 #include <map>
 #include <vector>
@@ -27,7 +27,7 @@ namespace ICon
 	{
 	private:
 		
-		std::shared_ptr<FixedConnection> con;
+		std::shared_ptr<HighLayerSocket> con;
 		std::vector < unsigned char > buffer;
 		
 	public:
@@ -50,12 +50,12 @@ namespace ICon
 		unsigned long long read( void * dst, const unsigned size );
 		unsigned long long GetNextBufferSize();
 		
-		void SetFixedConnection( std::shared_ptr<FixedConnection> con );
-		std::shared_ptr<FixedConnection> GetFixedConnection();
+		void SetHighLayerSocket( std::shared_ptr<HighLayerSocket> con );
+		std::shared_ptr<HighLayerSocket> GetHighLayerSocket();
 		
 		void Close();
 		
-		Connection( std::shared_ptr<FixedConnection> con_ );
+		Connection( std::shared_ptr<HighLayerSocket> con_ );
 		Connection();
 		~Connection();
 	};

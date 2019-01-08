@@ -16,7 +16,7 @@
 namespace ICon
 {
 	template < typename CallBackType, typename... Args >
-	void _DeepServer_AcceptNoLock_ThreadFunction_OneAccept( std::shared_ptr<DeepServer> server, std::shared_ptr<FixedConnection> con, CallBackType callBackFunction, Args... args )
+	void _DeepServer_AcceptNoLock_ThreadFunction_OneAccept( std::shared_ptr<DeepServer> server, std::shared_ptr<HighLayerSocket> con, CallBackType callBackFunction, Args... args )
 	{
 		server->AcceptNoLockRunned( con, callBackFunction, args... );
 	}
@@ -29,7 +29,7 @@ namespace ICon
 	
 	
 	template < typename CallBackType, typename... Args >
-	void DeepServer::AcceptNoLockRunned( std::shared_ptr<FixedConnection> con, CallBackType callBackFunction, Args... args )
+	void DeepServer::AcceptNoLockRunned( std::shared_ptr<HighLayerSocket> con, CallBackType callBackFunction, Args... args )
 	{
 		while( this->Accept( con ) != ICon::Error::none ){}
 		this->isAcceptNoLockRunning.store( false );
@@ -41,7 +41,7 @@ namespace ICon
 	{
 		while( this->keepAcceptNoLockRunning.load() == true )
 		{
-			std::shared_ptr<FixedConnection> con( new FixedConnection );
+			std::shared_ptr<HighLayerSocket> con( new HighLayerSocket );
 			if( this->Accept( con ) == ICon::Error::none )
 			{
 				if( con->IsValid() )
@@ -55,7 +55,7 @@ namespace ICon
 	
 	
 	template < typename CallBackType, typename... Args >
-	void DeepServer::AcceptNoLock( std::shared_ptr<FixedConnection> con, CallBackType callBackFunction, Args... args )
+	void DeepServer::AcceptNoLock( std::shared_ptr<HighLayerSocket> con, CallBackType callBackFunction, Args... args )
 	{
 		if( this->opened )
 		{

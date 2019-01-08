@@ -10,14 +10,14 @@
 	No one can modify or remove this Copyright notice from this file.
 */
 
-#ifndef FIXED_CONNECTION_CPP
-#define FIXED_CONNECTION_CPP
+#ifndef HIGH_LAYER_SOCKET_CPP
+#define HIGH_LAYER_SOCKET_CPP
 
 #include <boost/asio/write.hpp>
 #include <boost/asio/buffer.hpp>
 
 #include "GlobalBoostAsio.h"
-#include "FixedConnection.h"
+#include "HighLayerSocket.h"
 #include "Error.h"
 
 #include <chrono>
@@ -25,12 +25,12 @@
 
 namespace ICon
 {
-	bool FixedConnection::IsReferencingToNothing( const std::vector < unsigned char > & var ) const
+	bool HighLayerSocket::IsReferencingToNothing( const std::vector < unsigned char > & var ) const
 	{
 		return &var == &constReferenceBuffer;
 	}
 	
-	unsigned FixedConnection::GetUnreceivedBytes()
+	unsigned HighLayerSocket::GetUnreceivedBytes()
 	{
 		if( this->IsValid() )
 		{
@@ -39,12 +39,12 @@ namespace ICon
 		return 0;
 	}
 	
-	bool FixedConnection::IsValid() const
+	bool HighLayerSocket::IsValid() const
 	{
 		return this->isValid;
 	}
 	
-	unsigned FixedConnection::Connect( const char * ip, const unsigned short port )
+	unsigned HighLayerSocket::Connect( const char * ip, const unsigned short port )
 	{
 		boost::system::error_code ec;
 		this->socket.connect( boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string(ip), port ), ec );
@@ -58,7 +58,7 @@ namespace ICon
 		return ICon::Error::none;
 	}
 	
-	void FixedConnection::UpdateReceiveBuffer()
+	void HighLayerSocket::UpdateReceiveBuffer()
 	{
 		while( this->receiveBuffer.size() >= sizeof(unsigned) )
 		{
@@ -83,7 +83,7 @@ namespace ICon
 		}
 	}
 	
-	void FixedConnection::Receive()
+	void HighLayerSocket::Receive()
 	{
 		if( this->IsValid() )
 		{
@@ -110,7 +110,7 @@ namespace ICon
 		}
 	}
 	
-	void FixedConnection::ReceiveLock( bool doNotThrowErrorBecauseOfClosingSequence )
+	void HighLayerSocket::ReceiveLock( bool doNotThrowErrorBecauseOfClosingSequence )
 	{
 		if( this->IsValid() )
 		{
@@ -136,12 +136,12 @@ namespace ICon
 			ICon::Error::Push( ICon::Error::Code::tryingToReceiveFromInvalidConnection );
 	}
 	
-	unsigned FixedConnection::CountReceivedMessages() const
+	unsigned HighLayerSocket::CountReceivedMessages() const
 	{
 		return this->buffers.size();
 	}
 	
-	const std::vector < unsigned char > & FixedConnection::GetMessageLock()
+	const std::vector < unsigned char > & HighLayerSocket::GetMessageLock()
 	{
 		if( this->buffers.size() > 0 )
 		{
@@ -159,7 +159,7 @@ namespace ICon
 		return this->constReferenceBuffer;
 	}
 	
-	const std::vector < unsigned char > & FixedConnection::GetMessage()
+	const std::vector < unsigned char > & HighLayerSocket::GetMessage()
 	{
 		if( this->buffers.size() > 0 )
 		{
@@ -169,7 +169,7 @@ namespace ICon
 		return this->constReferenceBuffer;
 	}
 	
-	void FixedConnection::PopMessage( unsigned count )
+	void HighLayerSocket::PopMessage( unsigned count )
 	{
 		if( this->buffers.size() > count )
 		{
@@ -182,13 +182,13 @@ namespace ICon
 		}
 	}
 	
-	unsigned long long FixedConnection::Send( const void * buffer, const unsigned bytes )
+	unsigned long long HighLayerSocket::Send( const void * buffer, const unsigned bytes )
 	{
 		if( this->IsValid() )
 		{
 			if( buffer != nullptr )
 			{
-				if( bytes > 0 && bytes < FixedConnection::maxBufferSize )
+				if( bytes > 0 && bytes < HighLayerSocket::maxBufferSize )
 				{
 					boost::system::error_code ec;
 					unsigned long long ret;
@@ -218,7 +218,7 @@ namespace ICon
 		return 0;
 	}
 	
-	unsigned long long FixedConnection::Send( const void ** buffer, const unsigned * bytes, const unsigned buffers )
+	unsigned long long HighLayerSocket::Send( const void ** buffer, const unsigned * bytes, const unsigned buffers )
 	{
 		if( this->IsValid() )
 		{
@@ -236,7 +236,7 @@ namespace ICon
 					sumBytesL += bytes[i];
 				}
 				
-				if( sumBytesL < buffers || sumBytesL > (unsigned long long)ICon::FixedConnection::maxBufferSize )
+				if( sumBytesL < buffers || sumBytesL > (unsigned long long)ICon::HighLayerSocket::maxBufferSize )
 				{
 					ICon::Error::Push( ICon::Error::tryingToSendInvalidDataSize );
 					return 0;
@@ -276,7 +276,7 @@ namespace ICon
 		return 0;
 	}
 	
-	void FixedConnection::ErrorClose()
+	void HighLayerSocket::ErrorClose()
 	{
 		if( this->IsValid() )
 		{
@@ -289,7 +289,7 @@ namespace ICon
 		}
 	}
 	
-	void FixedConnection::Close()
+	void HighLayerSocket::Close()
 	{
 		if( this->IsValid() )
 		{
@@ -307,13 +307,13 @@ namespace ICon
 		}
 	}
 	
-	FixedConnection::FixedConnection() :
+	HighLayerSocket::HighLayerSocket() :
 			socket(*ICon::ioService)
 	{
 		this->isValid = false;
 	}
 	
-	FixedConnection::~FixedConnection()
+	HighLayerSocket::~HighLayerSocket()
 	{
 		this->Close();
 	}

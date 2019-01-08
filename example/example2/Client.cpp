@@ -14,7 +14,7 @@ int main()
 		ICon::Error::PrintWhenPushed();
 		
 		{
-			std::shared_ptr<ICon::FixedConnection> fcon( new ICon::FixedConnection() );
+			std::shared_ptr<ICon::HighLayerSocket> fcon( new ICon::HighLayerSocket() );
 			
 			std::vector <int> tab;
 			if( fcon->Connect( "127.0.0.1", 27000 ) == ICon::Error::Code::none )

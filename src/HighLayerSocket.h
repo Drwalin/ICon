@@ -10,8 +10,8 @@
 	No one can modify or remove this Copyright notice from this file.
 */
 
-#ifndef FIXED_CONNECTION_H
-#define FIXED_CONNECTION_H
+#ifndef HIGH_LAYER_SOCKET_H
+#define HIGH_LAYER_SOCKET_H
 
 #include <vector>
 #include <array>
@@ -29,7 +29,7 @@
 
 namespace ICon
 {
-	class FixedConnection final
+	class HighLayerSocket final
 	{
 	private:
 		
@@ -74,8 +74,8 @@ namespace ICon
 		void ErrorClose();
 		void Close();
 		
-		FixedConnection();
-		~FixedConnection();
+		HighLayerSocket();
+		~HighLayerSocket();
 	};
 };
 

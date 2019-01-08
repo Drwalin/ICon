@@ -4,7 +4,7 @@
 
 #include <cstdio>
 
-#include "../../src/BinaryType.h"
+#include "../../src/BinaryType.cpp"
 
 void PrintLN( FILE * f, int offset )
 {
@@ -93,6 +93,7 @@ void Print( FILE * f, const std::map<T1,T2> & val, int offset )
 
 int main()
 {
+	std::map < std::vector < std::set < std::vector<std::string> > >, std::map < std::vector<int>, std::set<double> > > val2;
 	std::map < std::vector < std::set < std::vector<std::string> > >, std::map < std::vector<long long>, std::set<float> > > val1 =	{ // map
 																																	{ // map::pair
 																																		{ // vector
@@ -277,7 +278,6 @@ int main()
 																																	},
 																																	
 																																};
-	std::map < std::vector < std::set < std::vector<std::string> > >, std::map < std::vector<int>, std::set<double> > > val2;
 	std::vector < unsigned char > type;
 	
 	FILE * f1 = fopen( "f1.txt", "w" );
@@ -297,6 +297,7 @@ int main()
 	
 	
 	Print( f1, val1 );
+	Print( stderr, val1 );
 	
 	std::vector < unsigned char > data;
 	
@@ -321,6 +322,7 @@ int main()
 	printf( "\n Restored offset: %llu", restored );
 	
 	Print( f2, val1 );
+	Print( stderr, val1 );
 	
 	
 	

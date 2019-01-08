@@ -13,7 +13,7 @@ int main()
 	
 	{
 		std::shared_ptr<ICon::DeepServer> server = ICon::DeepServer::Make();
-		std::shared_ptr<ICon::FixedConnection> fcon( new ICon::FixedConnection() );
+		std::shared_ptr<ICon::HighLayerSocket> fcon( new ICon::HighLayerSocket() );
 		
 		std::vector <int> tab;
 		server->StartListening( 27000 );
