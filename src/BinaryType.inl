@@ -146,12 +146,9 @@ namespace Binary
 				{
 					tempOffset = Binary::Restore( src, dst[i], tempOffset );
 				}
-				printf( " (std::map->1:%llu)", tempOffset );
 				return tempOffset;
 			}
-			printf( " (std::map->2:0)" );
 		}
-		printf( " (std::map->3:0)" );
 		return 0;
 	}
 	
@@ -172,21 +169,17 @@ namespace Binary
 					tempOffset = Binary::Restore( src, temp1, tempOffset );
 					if( tempOffset == 0 )
 					{
-						printf( " (std::map->1:0)" );
 						break;
 					}
 					tempOffset = Binary::Restore( src, dst[temp1], tempOffset );
 					if( tempOffset == 0 )
 					{
-						printf( " (std::map->2:0)" );
 						break;
 					}
 				}
-				printf( " (std::map->3:%llu)", tempOffset );
 				return tempOffset;
 			}
 		}
-		printf( " (std::map->4:0)" );
 		return 0;
 	}
 	

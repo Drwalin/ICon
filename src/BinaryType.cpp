@@ -222,10 +222,8 @@ namespace Binary
 		if( src.size() >= offset + sizeof(dst) )																		\
 		{																												\
 			memmove( &dst, &(src.front()) + offset, sizeof(dst) );														\
-			printf( " (fundamental->1:%llu)", offset + sizeof(dst) );											\
 			return offset + sizeof(dst);																				\
 		}																												\
-		printf( " (fundamental->2:0)" );																		\
 		return 0;																										\
 	}
 	
@@ -254,9 +252,7 @@ namespace Binary
 			else
 				dst = false;
 			return offset + 1;
-			printf( " (bool->2:%llu)", offset + 1 );
 		}
-		printf( " (bool->2:0)" );
 		return 0;
 	}
 	
@@ -268,10 +264,8 @@ namespace Binary
 				dst = true;
 			else
 				dst = false;
-			printf( " (std::vector<bool>::reference->2:%llu)", offset + 1 );
 			return offset + 1;
 		}
-		printf( " (std::vector<bool>::reference->2:0)" );
 		return 0;
 	}
 	
@@ -289,12 +283,9 @@ namespace Binary
 				dst.resize( elements+1 );
 				dst[elements] = 0;
 				memmove( &(dst.front()), &(src.front()) + offset + sizeof(Binary::Type::NumberOfElements), elements );
-				printf( " (std::string->1:%llu)", offset + sizeof(Binary::Type::NumberOfElements) + elements );
 				return offset + sizeof(Binary::Type::NumberOfElements) + elements;
 			}
-			printf( " (std::string->2:0)" );
 		}
-		printf( " (std::string->3:0)" );
 		return 0;
 	}
 };

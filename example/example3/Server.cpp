@@ -5,8 +5,6 @@
 #include "../../src/HighLayerSocket.h"
 #include "../../src/DeepServer.h"
 
-//#include "../Source.cpp"
-
 int main()
 {
 	ICon::Init();

@@ -17,6 +17,7 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/write.hpp>
+#include <boost/asio/io_service.hpp>
 
 #include "GlobalBoostAsio.h"
 #include "HighLayerSocket.h"

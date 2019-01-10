@@ -4,8 +4,6 @@
 #include "../../src/Connection.h"
 #include "../../src/HighLayerSocket.h"
 
-//#include "../Source.cpp"
-
 #include <boost/exception/all.hpp>
 
 int main()

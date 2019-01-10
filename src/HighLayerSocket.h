@@ -18,6 +18,7 @@
 
 #include "GlobalBoostAsio.h"
 #include "Error.h"
+#include <boost/asio/io_service.hpp>
 
 /*
 	Warning:
