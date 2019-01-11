@@ -54,7 +54,7 @@ namespace Binary
 			STRING = 0x23
 		};
 		
-		unsigned long long GetOffset( const std::vector < unsigned char > & type, unsigned long long offset = 0 );
+		unsigned long long GetOffset( const unsigned char * type, const unsigned long long length, unsigned long long offset = 0 );		// return 0 if too small array was given
 		
 		
 		unsigned long long Get( std::vector < unsigned char > & type, const void * src, unsigned long long offset = 0 );

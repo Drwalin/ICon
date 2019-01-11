@@ -34,9 +34,9 @@ namespace ICon
 		
 		bool IsValid();
 		
-		void WaitForAnythingToReceive();
+		void WaitForAnythingToReceive();		// wait until con->buffer contain all message or is filled
 		void UpdateReceive();
-		bool IsAnythingToRecevie( bool updateReceive = true );
+		bool IsAnythingToRecevie( bool updateReceive = true );		// return if part of message (at least its length) is to receive
 		
 		// stream output operator waits until full message arrive and is of correct type to argument (otherwise it throws an ICon::Error and returns without modifying argument and without poping an message) or connection is lost
 		template < typename T >

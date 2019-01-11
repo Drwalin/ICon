@@ -25,12 +25,13 @@ int main()
 			con->Send( &(tab.front()), tab.size() * sizeof(int) );
 			
 			
-			auto v = con->GetMessageLock();
-			tab.resize( v.size() / sizeof(int) );
-			memcpy( &tab.front(), &v.front(), tab.size() * sizeof(int) );
+			
+			unsigned messageSize = con->GetNextMessageLengthLock();
+			tab.resize( messageSize / sizeof(int) );
+			unsigned recv = con->GetMessageLock( &(tab.front()), messageSize );
+			con->PopMessage();
 			for( int i = 0; i < tab.size(); ++i )
 				printf( "\n tab[%i] = %i ", i, tab[i] );
-			
 			
 			con->Close();
 		}

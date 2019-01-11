@@ -19,8 +19,10 @@ namespace Binary
 {
 	namespace Type
 	{
-		unsigned long long GetOffset( const std::vector < unsigned char > & type, unsigned long long offset )
+		unsigned long long GetOffset( const unsigned char * type, const unsigned long long length, unsigned long long offset )
 		{
+			if( offset >= length )
+				return 0;
 			switch( type[offset] )
 			{
 			case RAW:

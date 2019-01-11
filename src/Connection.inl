@@ -41,21 +41,22 @@ namespace ICon
 	{
 		if( this->IsValid() )
 		{
-			this->con->ReceiveLock();
+			this->buffer.clear();
+			this->buffer.reserve( 1024*512 );
+			const unsigned long long typeSize = Binary::Type::Get( this->buffer, obj );
 			
-			if( this->con->CountReceivedMessages() > 0 )
+			unsigned messageSize = this->con->GetNextMessageLengthLock();
+			
+			if( messageSize != 0 )
 			{
-				this->buffer.clear();
-				this->buffer.reserve( 1024*512 );
-				const unsigned long long typeSize = Binary::Type::Get( this->buffer, obj );
+				this->buffer.resize( typeSize + messageSize );
+				unsigned received = this->con->GetMessageLock( &(this->buffer[typeSize]), messageSize );
 				
-				const std::vector < unsigned char > & receivedMessage = this->con->GetMessageLock();
-				
-				if( receivedMessage.size() != 0 )
+				if( received == messageSize )
 				{
-					if( Binary::Type::IsValid( receivedMessage, obj, 0 ) )
+					if( Binary::Type::IsValid( this->buffer, obj, typeSize ) )
 					{
-						unsigned long long restored = Binary::Restore( &(receivedMessage.front()), receivedMessage.size(), obj, typeSize );
+						unsigned long long restored = Binary::Restore( &(this->buffer[typeSize]), messageSize, obj, typeSize );
 						if( restored == 0 )
 							ICon::Error::Push( ICon::Error::Code::failedToReceiveToValidType, __LINE__, __FILE__ );
 						this->con->PopMessage();

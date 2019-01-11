@@ -28,9 +28,9 @@
 
 namespace ICon
 {
-	bool HighLayerSocket::IsReferencingToNothing( const std::vector < unsigned char > & var ) const
+	const LoopBuffer & HighLayerSocket::AccessBuffer() const
 	{
-		return &var == &constReferenceBuffer;
+		return this->buffer;
 	}
 	
 	unsigned HighLayerSocket::GetUnreceivedBytes()
@@ -65,132 +65,231 @@ namespace ICon
 		return ICon::Error::none;
 	}
 	
-	void HighLayerSocket::UpdateReceiveBuffer()
+	void HighLayerSocket::Receive( bool lockForAnyBytes )
 	{
-		while( this->receiveBuffer.size() >= sizeof(unsigned) )
+		if( this->IsValid() )
 		{
-			unsigned long long bytesToReceive = unsigned( *( (unsigned*) &(this->receiveBuffer.front()) ) );
-			if( bytesToReceive > 0 && bytesToReceive < maxBufferSize )
+			while( true )
 			{
-				if( this->receiveBuffer.size() >= bytesToReceive + sizeof(unsigned) )
+				unsigned long long availableSpaceAtOnce = this->buffer.GetAvailableLengthAtOnceOnEnd();
+				unsigned long long availableBytesToReceive = lockForAnyBytes ? availableSpaceAtOnce : this->GetUnreceivedBytes();
+				unsigned long long read = availableBytesToReceive < availableSpaceAtOnce ? availableBytesToReceive : availableSpaceAtOnce;
+				if( read > 0 )
 				{
-					this->buffers.emplace_back( this->receiveBuffer.begin() + sizeof(unsigned), this->receiveBuffer.begin() + sizeof(unsigned) + bytesToReceive );
-					this->receiveBuffer.erase( this->receiveBuffer.begin(), this->receiveBuffer.begin() + sizeof(unsigned) + bytesToReceive );
+					boost::system::error_code ec;
+					unsigned long long received = ((boost::asio::ip::tcp::socket*)(this->socket))->read_some( boost::asio::buffer( this->buffer.GetEndPtr(), read ), ec );
+					this->buffer.PushData( received );
+					if( received == 0 )
+						ICon::Error::Push( ICon::Error::Code::receivedZeroBytesWhileReceivingNoLock, __LINE__, __FILE__ );
+					if( ec )
+					{
+						ICon::Error::Push( ICon::Error::Code::failedToReceiveBuffer, __LINE__, __FILE__ );
+						this->ErrorClose();
+						return;
+					}
+				}
+				else
+					break;
+				lockForAnyBytes = false;
+			}
+		}
+		else
+		{
+			ICon::Error::Push( ICon::Error::Code::tryingToReceiveFromInvalidHighLayerSocket, __LINE__, __FILE__ );
+		}
+		
+		if( this->buffer.GetBytesStored() >= sizeof(unsigned) )
+		{
+			unsigned recv = 0;
+			this->buffer.GetData( &recv, sizeof(unsigned), 0 );
+			if( recv == 0 )
+				this->ErrorClose();
+		}
+	}
+	
+	void HighLayerSocket::ReceiveClose()
+	{
+		if( this->IsValid() )
+		{
+			while( this->IsValid() )
+			{
+				unsigned messageSize = 0;
+				if( this->buffer.GetBytesStored() >= sizeof(unsigned) )
+				{
+					this->buffer.GetData( &messageSize, sizeof(unsigned), 0 );
+					this->buffer.MoveOrigin( sizeof(unsigned) );
+					if( recv == 0 )
+						this->ErrorClose();
+					else
+					{
+						if( this->buffer.GetBytesStored() > messageSize )
+							this->buffer.MoveOrigin( messageSize );
+						else
+						{
+							messageSize -= this->buffer.GetBytesStored();
+							this->buffer.Clear();
+							if( messageSize != 0 )
+							{
+								while( messageSize != 0 )
+								{
+									unsigned long long available = this->buffer.GetAvailableLengthAtOnceOnEnd();
+									if( messageSize < available )
+										available = messageSize;
+									boost::system::error_code ec;
+									unsigned long long received = ((boost::asio::ip::tcp::socket*)(this->socket))->read_some( boost::asio::buffer( this->buffer.GetEndPtr(), available ), ec );
+									messageSize -= received;
+								}
+							}
+						}
+					}
+				}
+				else
+					this->Receive( true );
+			}
+		}
+		else
+			ICon::Error::Push( ICon::Error::Code::tryingToReceiveFromInvalidHighLayerSocket, __LINE__, __FILE__ );
+	}
+	
+	bool HighLayerSocket::IsAllMessageAvailable()
+	{
+		if( this->buffer.GetBytesStored() >= sizeof(unsigned) )
+		{
+			unsigned recv = 0;
+			this->buffer.GetData( &recv, sizeof(unsigned), 0 );
+			if( recv == 0 )
+				this->ErrorClose();
+			else if( this->buffer.GetBytesStored() >= recv + sizeof(unsigned) )
+				return true;
+		}
+		return false;
+	}
+	
+	bool HighLayerSocket::IsMessageAvailable()
+	{
+		if( this->buffer.GetBytesStored() >= sizeof(unsigned) )
+		{
+			unsigned recv = 0;
+			this->buffer.GetData( &recv, sizeof(unsigned), 0 );
+			if( recv == 0 )
+				this->ErrorClose();
+			else
+				return true;
+		}
+		return false;
+	}
+	
+	unsigned long long HighLayerSocket::GetNextMessageLengthLock()
+	{
+		if( this->IsValid() )
+		{
+			while( this->IsValid() && this->buffer.GetBytesStored() < sizeof(unsigned) )
+				this->Receive( true );
+			if( this->IsValid() )
+				return this->GetNextMessageLength();
+			else
+				ICon::Error::Push( ICon::Error::Code::connectionBrokenWhileReceiving, __LINE__, __FILE__ );
+		}
+		else
+			ICon::Error::Push( ICon::Error::Code::tryingToReceiveFromInvalidHighLayerSocket, __LINE__, __FILE__ );
+		return 0;
+	}
+	
+	unsigned long long HighLayerSocket::GetNextMessageLength() const
+	{
+		if( this->buffer.GetBytesStored() >= sizeof(unsigned) )
+		{
+			unsigned recv = 0;
+			this->buffer.GetData( &recv, sizeof(unsigned), 0 );
+			return recv;
+		}
+		return 0;
+	}
+	
+	unsigned long long HighLayerSocket::GetMessage( void * dst, unsigned long long length, unsigned long long offset )
+	{
+		if( this->IsAllMessageAvailable() )
+		{
+			unsigned long long size = this->GetNextMessageLength();
+			if( offset + length <= size )
+				this->buffer.GetData( dst, length, sizeof(unsigned) + offset );
+			else if( offset < size )
+				this->buffer.GetData( dst, size-offset, sizeof(unsigned) + offset );
+			else
+				return 0;
+			return size;
+		}
+		return 0;
+	}
+	
+	unsigned long long HighLayerSocket::GetMessageLock( void * dst, unsigned long long length, unsigned long long offset )
+	{
+		if( this->IsValid() )
+		{
+			while( this->IsValid() && this->IsAllMessageAvailable() == false && this->buffer.GetAvailableFreeBytes() != 0 )
+				this->Receive( true );
+			if( this->IsAllMessageAvailable() )
+				return this->GetMessage( dst, length, offset );
+		}
+		else
+			ICon::Error::Push( ICon::Error::Code::tryingToReceiveFromInvalidHighLayerSocket, __LINE__, __FILE__ );
+		return 0;
+	}
+	
+	void HighLayerSocket::PopMessage( void * dst )
+	{
+		if( this->IsAllMessageAvailable() )
+		{
+			unsigned long long messageSize = this->GetNextMessageLength();
+			this->buffer.MoveOrigin( sizeof(unsigned) + messageSize );
+		}
+		else
+			ICon::Error::Push( ICon::Error::Code::tryingToPopEmptyMessageStack, __LINE__, __FILE__ );
+	}
+	
+	void HighLayerSocket::GetPopMessageLock( void * dst )
+	{
+		if( this->IsValid() || this->IsAllMessageAvailable() )
+		{
+			while( this->IsValid() && this->buffer.GetBytesStored() < sizeof(unsigned) )
+				this->Receive( true );
+			
+			if( this->IsValid() )
+			{
+				unsigned messageSize = this->GetNextMessageLength();
+				this->buffer.MoveOrigin( sizeof(unsigned) );
+				if( this->buffer.GetBytesStored() >= messageSize )
+				{
+					this->buffer.GetData( dst, messageSize );
+					this->buffer.MoveOrigin( messageSize );
 				}
 				else
 				{
-					break;
+					boost::system::error_code ec;
+					unsigned current = this->buffer.GetBytesStored();
+					this->buffer.GetData( dst, current );
+					messageSize -= current;
+					dst += current;
+					this->buffer.Clear();
+					while( messageSize != 0 )
+					{
+						unsigned long long received = ((boost::asio::ip::tcp::socket*)(this->socket))->read_some( boost::asio::buffer( dst, messageSize ), ec );
+						if( ec || received == 0 )
+						{
+							ICon::Error::Push( ICon::Error::Code::failedToGetPopMessageLockDueToBoostAsioError, __LINE__, __FILE__ );
+							this->ErrorClose();
+							return;
+						}
+						messageSize -= received;
+						dst += received;
+					}
 				}
 			}
 			else
-			{
-				this->ErrorClose();
-				break;
-			}
-		}
-	}
-	
-	void HighLayerSocket::Receive()
-	{
-		if( this->IsValid() )
-		{
-			boost::system::error_code ec;
-			unsigned long long availableBytesToReceive = this->GetUnreceivedBytes();
-			if( availableBytesToReceive > 0 )
-			{
-				unsigned long long previousBufferSize = this->receiveBuffer.size();
-				this->receiveBuffer.resize( previousBufferSize + availableBytesToReceive );
-				unsigned long long received = ((boost::asio::ip::tcp::socket*)(this->socket))->read_some( boost::asio::buffer( &(this->receiveBuffer[previousBufferSize]), availableBytesToReceive ), ec );
-				this->receiveBuffer.resize( previousBufferSize + received );
-				printf( "\n Received: %7llu / %7llu ", received, availableBytesToReceive );
-			}
-			else
-			{
-				printf( "\n No bytes available" );
-			}
-			
-			this->UpdateReceiveBuffer();
+				ICon::Error::Push( ICon::Error::Code::connectionBrokenWhileReceiving, __LINE__, __FILE__ );
 		}
 		else
-		{
 			ICon::Error::Push( ICon::Error::Code::tryingToReceiveFromInvalidHighLayerSocket, __LINE__, __FILE__ );
-		}
-	}
-	
-	void HighLayerSocket::ReceiveLock( bool doNotThrowErrorBecauseOfClosingSequence )
-	{
-		if( this->IsValid() )
-		{
-			while( this->buffers.size() == 0 )
-			{
-				boost::system::error_code ec;
-				unsigned long long availableBytesToReceive = 4096;
-				unsigned long long previousBufferSize = this->receiveBuffer.size();
-				this->receiveBuffer.resize( previousBufferSize + availableBytesToReceive );
-				unsigned long long received = ((boost::asio::ip::tcp::socket*)(this->socket))->read_some( boost::asio::buffer( &(this->receiveBuffer[previousBufferSize]), availableBytesToReceive ), ec );
-				this->receiveBuffer.resize( previousBufferSize + received );
-				this->UpdateReceiveBuffer();
-				if( ec )
-				{
-					if( doNotThrowErrorBecauseOfClosingSequence == false )
-						ICon::Error::Push( ICon::Error::Code::connectionBrokenWhileReceiving, __LINE__, __FILE__ );
-					this->ErrorClose();
-					return;
-				}
-			}
-		}
-		else if( doNotThrowErrorBecauseOfClosingSequence == false )
-			ICon::Error::Push( ICon::Error::Code::tryingToReceiveFromInvalidHighLayerSocket, __LINE__, __FILE__ );
-	}
-	
-	unsigned HighLayerSocket::CountReceivedMessages() const
-	{
-		return this->buffers.size();
-	}
-	
-	const std::vector < unsigned char > & HighLayerSocket::GetMessageLock()
-	{
-		if( this->buffers.size() > 0 )
-		{
-			return this->buffers.front();
-		}
-		else if( this->IsValid() )
-		{
-			this->ReceiveLock();
-			if( this->buffers.size() > 0 )
-			{
-				return this->buffers.front();
-			}
-		}
-		else
-		{
-			ICon::Error::Push( ICon::Error::tryingToGetBufferFromInvalidHighSocketLayer, __LINE__, __FILE__ );
-		}
-		ICon::Error::Push( ICon::Error::highLayerSocketGetMessageReturnedConstReference, __LINE__, __FILE__ );
-		return this->constReferenceBuffer;
-	}
-	
-	const std::vector < unsigned char > & HighLayerSocket::GetMessage()
-	{
-		if( this->buffers.size() > 0 )
-		{
-			return this->buffers.front();
-		}
-		ICon::Error::Push( ICon::Error::highLayerSocketGetMessageReturnedConstReference, __LINE__, __FILE__ );
-		return this->constReferenceBuffer;
-	}
-	
-	void HighLayerSocket::PopMessage( unsigned count )
-	{
-		if( this->buffers.size() >= count )
-		{
-			this->buffers.erase( this->buffers.begin() );
-		}
-		else
-		{
-			this->buffers.clear();
-			ICon::Error::Push( ICon::Error::tryingToPopMoreBuffersThanExist, __LINE__, __FILE__ );
-		}
 	}
 	
 	unsigned long long HighLayerSocket::Send( const void * buffer, const unsigned bytes )
@@ -306,11 +405,7 @@ namespace ICon
 		{
 			unsigned zero = 0;
 			((boost::asio::ip::tcp::socket*)(this->socket))->write_some( boost::asio::buffer( &zero, sizeof(unsigned) ) );
-			while( this->IsValid() )
-			{
-				this->buffers.resize( 0 );
-				this->ReceiveLock( true );
-			}
+			this->ReceiveClose();
 			((boost::asio::ip::tcp::socket*)(this->socket))->close();
 			((boost::asio::ip::tcp::socket*)(this->socket))->close();
 			((boost::asio::ip::tcp::socket*)(this->socket))->close();
@@ -323,6 +418,7 @@ namespace ICon
 			command( new boost::asio::socket_base::bytes_readable() )
 	{
 		this->isValid = false;
+		this->buffer.Init( 1024, 1024 );
 	}
 	
 	HighLayerSocket::~HighLayerSocket()

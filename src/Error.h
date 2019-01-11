@@ -67,7 +67,6 @@ namespace ICon
 			failedToAccept =				0x1007,
 			
 			tryingToRunAcceptWhileAcceptNoLockIsRunning =		0x2001,
-			tryingToGetBufferFromInvalidHighSocketLayer =		0x2002,
 			tryingToAcceptToUnallocatedHighSocketLayer =		0x2003,
 			tryingToReceiveFromInvalidHighLayerSocket =			0x2004,
 			tryingToSendDataByInvalidHighSocketLayer =			0x2005,
@@ -79,22 +78,22 @@ namespace ICon
 			tryingToReadFromInvalidConnection =					0x200B,
 			tryingToDeInintUnexistingContext =					0x200C,
 			tryingToAcceptUsingClosedServer =					0x200D,
-			tryingToPopMoreBuffersThanExist = 					0x200E,
 			tryingToSendInvalidBuffersArray =					0x200F,
 			tryingToSendInvalidDataPointer =					0x2010,
 			tryingToAccessEmptyErrorQueue =						0x2011,
 			tryingToReceiveToInvalidType =						0x2012,
-			tryingToSendInvalidDataSize =						0x2013,
+			tryingToPopEmptyMessageStack =						0x2013,
+			tryingToSendInvalidDataSize =						0x2014,
 			
-			highLayerSocketGetMessageReturnedConstReference =	0x3001,
 			connectionClosedByErrorWhileSendingData =			0x3002,
 			connectionBrokenWhileReceiving =					0x3003,
 			receivedInvalidBuffer =								0x3004,
 			
 			failedToGetMessageLockWhichReturnedConstReference = 0x4001,
-			failedToAllocateBoostAsioEndpointOrAcceptor =		0x4002,
+			failedToGetPopMessageLockDueToBoostAsioError =		0x4002,
+			failedToAllocateBoostAsioEndpointOrAcceptor =		0x4003,
 			
-			
+			receivedZeroBytesWhileReceivingNoLock =				0x5001,
 			
 			
 			unknown =		0xFFFF

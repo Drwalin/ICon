@@ -19,7 +19,7 @@ namespace ICon
 {
 	bool Connection::IsValid()
 	{
-		if( this->con )
+		if( this->con != nullptr )
 		{
 			if( this->con->IsValid() )
 			{
@@ -45,7 +45,7 @@ namespace ICon
 		}
 		if( this->con )
 		{
-			return this->con->CountReceivedMessages() != 0;
+			return this->con->IsMessageAvailable();
 		}
 		return false;
 	}
@@ -54,7 +54,8 @@ namespace ICon
 	{
 		if( this->IsValid() )
 		{
-			this->con->ReceiveLock();
+			while( this->con->IsValid() && this->con->IsAllMessageAvailable() == false && this->con->AccessBuffer().GetAvailableFreeBytes() != 0 )
+				this->con->Receive( true );
 		}
 	}
 	
@@ -80,6 +81,7 @@ namespace ICon
 		return 0;
 	}
 	
+	/*
 	unsigned long long Connection::read( void * dst, const unsigned size )
 	{
 		if( this->IsValid() )
@@ -115,25 +117,33 @@ namespace ICon
 			ICon::Error::Push( ICon::Error::Code::tryingToReadFromInvalidConnection, __LINE__, __FILE__ );
 		return 0;
 	}
+	*/
 	
 	unsigned long long Connection::GetNextBufferSize()
 	{
-		if( this->buffer.size() > 0 )
+		if( this->con != nullptr )
 		{
-			return this->buffer.size();
-		}
-		if( this->IsValid() )
-		{
-			unsigned long long messageSize = this->con->GetMessageLock().size();
+			unsigned messageSize = this->con->GetNextMessageLengthLock();
 			if( messageSize > 0 )
 			{
-				unsigned long long typeSize = Binary::Type::GetOffset( this->con->GetMessageLock() );
-				if( typeSize > messageSize )
+				this->buffer.reserve( 1024 );
+				bool useReceiveLock = false;
+				while( this->IsValid() )
 				{
-					return messageSize - typeSize;
+					this->con->Receive( useReceiveLock );
+					unsigned recv = this->con->AccessBuffer().GetBytesStored() - sizeof(unsigned);
+					if( recv != 0 )
+					{
+						this->buffer.resize( recv );
+						this->con->AccessBuffer().GetData( &(this->buffer.front()), recv, sizeof(unsigned) );
+						unsigned long long typeSize = Binary::Type::GetOffset( &(this->buffer.front()), recv );
+						if( typeSize != 0 )
+							return messageSize - typeSize;
+					}
+					useReceiveLock = true;
 				}
-				else
-					ICon::Error::Push( ICon::Error::Code::receivedInvalidBuffer, __LINE__, __FILE__ );
+				if( this->IsValid() == false )
+					ICon::Error::Push( ICon::Error::Code::connectionBrokenWhileReceiving, __LINE__, __FILE__ );
 			}
 			else
 				ICon::Error::Push( ICon::Error::Code::failedToReceiveBuffer, __LINE__, __FILE__ );

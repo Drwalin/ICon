@@ -126,13 +126,10 @@ namespace ICon
 		
 		case ICon::Error::Code::tryingToRunAcceptWhileAcceptNoLockIsRunning: return "Trying to call DeepServer::Accept while DeepServer::AcceptNoLock is running";
 		case ICon::Error::Code::tryingToRunSecondInstancOfAcceptNoLock: return "Trying to run second instance of DeepServer::AcceptNoLock in one DeepServer";
-		case ICon::Error::Code::highLayerSocketGetMessageReturnedConstReference: return "HighLayerSocket::GetMessage(Lock) returned const reference message (no message has been received)";
 		
 		case ICon::Error::Code::tryingToDeInintUnexistingContext: return "Trying to DeInit unexisting ICon::ioService";
 		case ICon::Error::Code::tryingToAcceptUsingClosedServer: return "Trying to accept by closed DeepServer";
 		case ICon::Error::Code::tryingToAccessEmptyErrorQueue: return "Trying to access empty queue (ICon::globalErrorQueue)";
-		case ICon::Error::Code::tryingToPopMoreBuffersThanExist: return "Trying to pop more buffers than HighSocketLayer contain";
-		case ICon::Error::Code::tryingToGetBufferFromInvalidHighSocketLayer: return "Trying to get message from invalid HighSocketLayer";
 		case ICon::Error::Code::tryingToSendDataByInvalidHighSocketLayer: return "Trying to HighSocketLayer::Send through invalid HighSocketLayer";
 		case ICon::Error::Code::tryingToSendInvalidDataSize: return "Trying to HighSocketLayer::Send invalid data size";
 		case ICon::Error::Code::tryingToSendInvalidDataPointer: return "Trying to HighSocketLayer::Send invalid pointer";
@@ -141,6 +138,7 @@ namespace ICon
 		case ICon::Error::Code::tryingToReceiveFromInvalidHighLayerSocket: return "Trying to receive message from invalid HighLayerSocket";
 		case ICon::Error::Code::connectionBrokenWhileReceiving: return "Connection has been broken while receiving";
 		case ICon::Error::Code::tryingToReceiveToInvalidType: return "Trying to receive Connection::operator>> to invalid type";
+		case ICon::Error::Code::tryingToPopEmptyMessageStack: return "Trying to pop empty message buffer";
 		
 		case ICon::Error::Code::failedToReceiveLock: return "Failed to HighSocketLayer::ReceiveLock";
 		case ICon::Error::Code::failedToRestoreMessage: return "Failed to Binary::Restore message";
@@ -153,7 +151,10 @@ namespace ICon
 		case ICon::Error::Code::failedToReceiveToValidType: return "Failed to receive Connection::operator>> to a valid type";
 		
 		case ICon::Error::Code::failedToGetMessageLockWhichReturnedConstReference: return "Failed to HighLayerSocket::GetMessageLock which returned const reference";
+		case ICon::Error::Code::failedToGetPopMessageLockDueToBoostAsioError: return "Failed to HighLayerSocket::GetPopMessageLock receive due to boost::asio error";
 		case ICon::Error::Code::failedToAllocateBoostAsioEndpointOrAcceptor: return "Failed to allocate boost::asio::ip::tcp::endpoint or boost::asio::ip::tcp::acceptor";
+		
+		case ICon::Error::Code::receivedZeroBytesWhileReceivingNoLock: return "Failed to read_some data while receiving more than 0 bytes";
 		
 		case ICon::Error::Code::unknown: return "Unknown error";
 		};
