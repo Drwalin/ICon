@@ -22,13 +22,13 @@ int main()
 				
 				ICon::Connection con( fcon );
 				
-				float f;
+				double f;
 				
 				con >> f;
 				
 				printf( "\n received float = %f ", f );
 				
-				con << std::string( "Zielone mleko xDD" );
+				con << std::string( "Some random text to send through connection" );
 				
 				
 				std::map < std::vector<int>, std::vector<std::string> > testVal;

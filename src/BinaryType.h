@@ -124,36 +124,36 @@ namespace Binary
 	
 	// when Binary::Restore returns 0, it means src is not valid
 	
-	unsigned long long Restore( const std::vector < unsigned char > & src, float & dst, unsigned long long offset = 0 );
-	unsigned long long Restore( const std::vector < unsigned char > & src, double & dst, unsigned long long offset = 0 );
-	unsigned long long Restore( const std::vector < unsigned char > & src, long double & dst, unsigned long long offset = 0 );
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, float & dst, unsigned long long offset = 0 );
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, double & dst, unsigned long long offset = 0 );
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, long double & dst, unsigned long long offset = 0 );
 	
-	unsigned long long Restore( const std::vector < unsigned char > & src, char & dst, unsigned long long offset = 0 );
-	unsigned long long Restore( const std::vector < unsigned char > & src, short & dst, unsigned long long offset = 0 );
-	unsigned long long Restore( const std::vector < unsigned char > & src, int & dst, unsigned long long offset = 0 );
-	unsigned long long Restore( const std::vector < unsigned char > & src, long long & dst, unsigned long long offset = 0 );
-	unsigned long long Restore( const std::vector < unsigned char > & src, unsigned char & dst, unsigned long long offset = 0 );
-	unsigned long long Restore( const std::vector < unsigned char > & src, unsigned short & dst, unsigned long long offset = 0 );
-	unsigned long long Restore( const std::vector < unsigned char > & src, unsigned int & dst, unsigned long long offset = 0 );
-	unsigned long long Restore( const std::vector < unsigned char > & src, unsigned long long & dst, unsigned long long offset = 0 );
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, char & dst, unsigned long long offset = 0 );
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, short & dst, unsigned long long offset = 0 );
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, int & dst, unsigned long long offset = 0 );
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, long long & dst, unsigned long long offset = 0 );
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, unsigned char & dst, unsigned long long offset = 0 );
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, unsigned short & dst, unsigned long long offset = 0 );
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, unsigned int & dst, unsigned long long offset = 0 );
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, unsigned long long & dst, unsigned long long offset = 0 );
 	
-	unsigned long long Restore( const std::vector < unsigned char > & src, bool & dst, unsigned long long offset = 0 );
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, bool & dst, unsigned long long offset = 0 );
 	
-	unsigned long long Restore( const std::vector < unsigned char > & src, std::vector<bool>::reference dst, unsigned long long offset = 0 );
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, std::vector<bool>::reference dst, unsigned long long offset = 0 );
 	
 	
-	unsigned long long Restore( const std::vector < unsigned char > & src, std::string & dst, unsigned long long offset = 0 );
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, std::string & dst, unsigned long long offset = 0 );
 	
 	template < typename T >
-	unsigned long long Restore( const std::vector < unsigned char > & src, std::vector < T > & dst, unsigned long long offset = 0 );
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, std::vector < T > & dst, unsigned long long offset = 0 );
 	
 	//only add new elements, without clearing dst
 	template < typename T1, typename T2  >
-	unsigned long long Restore( const std::vector < unsigned char > & src, std::map < T1, T2 > & dst, unsigned long long offset = 0 );
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, std::map < T1, T2 > & dst, unsigned long long offset = 0 );
 	
 	//only add new elements, without clearing dst
 	template < typename T >
-	unsigned long long Restore( const std::vector < unsigned char > & src, std::set < T > & dst, unsigned long long offset = 0 );
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, std::set < T > & dst, unsigned long long offset = 0 );
 };
 
 #include "BinaryType.inl"

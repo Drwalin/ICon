@@ -217,11 +217,11 @@ namespace Binary
 	// internal types
 	
 #define RESTORE_INTERNAL_TYPE_MACRO_TEMPLATE( TYPE )																	\
-	unsigned long long Restore( const std::vector < unsigned char > & src, TYPE & dst, unsigned long long offset )		\
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, TYPE & dst, unsigned long long offset )		\
 	{																													\
-		if( src.size() >= offset + sizeof(dst) )																		\
+		if( length >= offset + sizeof(dst) )																		\
 		{																												\
-			memmove( &dst, &(src.front()) + offset, sizeof(dst) );														\
+			memmove( &dst, src + offset, sizeof(dst) );														\
 			return offset + sizeof(dst);																				\
 		}																												\
 		return 0;																										\
@@ -243,9 +243,9 @@ namespace Binary
 #undef RESTORE_INTERNAL_TYPE_MACRO_TEMPLATE
 	
 	
-	unsigned long long Restore( const std::vector < unsigned char > & src, bool & dst, unsigned long long offset )
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, bool & dst, unsigned long long offset )
 	{
-		if( src.size() >= offset + sizeof(dst) )
+		if( length >= offset + sizeof(dst) )
 		{
 			if( src[offset] )
 				dst = true;
@@ -256,9 +256,9 @@ namespace Binary
 		return 0;
 	}
 	
-	unsigned long long Restore( const std::vector < unsigned char > & src, std::vector<bool>::reference dst, unsigned long long offset )
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, std::vector<bool>::reference dst, unsigned long long offset )
 	{
-		if( src.size() >= offset + sizeof(dst) )
+		if( length >= offset + sizeof(dst) )
 		{
 			if( src[offset] )
 				dst = true;
@@ -272,17 +272,17 @@ namespace Binary
 	
 	
 	// std::string
-	unsigned long long Restore( const std::vector < unsigned char > & src, std::string & dst, unsigned long long offset )
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, std::string & dst, unsigned long long offset )
 	{
-		if( src.size() >= offset + sizeof(Binary::Type::NumberOfElements) )
+		if( length >= offset + sizeof(Binary::Type::NumberOfElements) )
 		{
 			Binary::Type::NumberOfElements elements = 0;
-			memmove( &elements, &(src.front()) + offset, sizeof(Binary::Type::NumberOfElements) );
-			if( src.size() >= offset + elements )
+			memmove( &elements, src + offset, sizeof(Binary::Type::NumberOfElements) );
+			if( length >= offset + elements )
 			{
 				dst.resize( elements+1 );
 				dst[elements] = 0;
-				memmove( &(dst.front()), &(src.front()) + offset + sizeof(Binary::Type::NumberOfElements), elements );
+				memmove( &(dst.front()), src + offset + sizeof(Binary::Type::NumberOfElements), elements );
 				return offset + sizeof(Binary::Type::NumberOfElements) + elements;
 			}
 		}

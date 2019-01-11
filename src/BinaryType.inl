@@ -87,9 +87,7 @@ namespace Binary
 		memmove( &(dst.front()) + offset, (&elements), sizeof(Binary::Type::NumberOfElements) );
 		unsigned long long tempOffset = offset + sizeof(Binary::Type::NumberOfElements);
 		for( unsigned long long i = 0; i < elements; ++i )
-		{
 			tempOffset = Binary::Store( dst, src[i], tempOffset );
-		}
 		return tempOffset;
 	}
 	
@@ -120,9 +118,7 @@ namespace Binary
 		memmove( &(dst.front()) + offset, (&elements), sizeof(Binary::Type::NumberOfElements) );
 		unsigned long long tempOffset = offset + sizeof(Binary::Type::NumberOfElements);
 		for( auto it = src.begin(); it != src.end(); ++it )
-		{
 			tempOffset = Binary::Store( dst, *it, tempOffset );
-		}
 		return tempOffset;
 	}
 	
@@ -132,20 +128,18 @@ namespace Binary
 	
 	// std::vector
 	template < typename T >
-	unsigned long long Restore( const std::vector < unsigned char > & src, std::vector < T > & dst, unsigned long long offset )
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, std::vector < T > & dst, unsigned long long offset )
 	{
-		if( src.size() >= offset + sizeof(Binary::Type::NumberOfElements) )
+		if( length >= offset + sizeof(Binary::Type::NumberOfElements) )
 		{
 			Binary::Type::NumberOfElements elements = 0;
-			memmove( &elements, &(src.front()) + offset, sizeof(Binary::Type::NumberOfElements) );
+			memmove( &elements, src + offset, sizeof(Binary::Type::NumberOfElements) );
 			dst.resize( elements );
-			if( src.size() >= offset + sizeof(Binary::Type::NumberOfElements) + elements )
+			if( length >= offset + sizeof(Binary::Type::NumberOfElements) + elements )
 			{
 				unsigned long long tempOffset = offset + sizeof(Binary::Type::NumberOfElements);
 				for( unsigned long long i = 0; i < elements; ++i )
-				{
-					tempOffset = Binary::Restore( src, dst[i], tempOffset );
-				}
+					tempOffset = Binary::Restore( src, length, dst[i], tempOffset );
 				return tempOffset;
 			}
 		}
@@ -154,28 +148,24 @@ namespace Binary
 	
 	// std::map
 	template < typename T1, typename T2  >
-	unsigned long long Restore( const std::vector < unsigned char > & src, std::map < T1, T2 > & dst, unsigned long long offset )
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, std::map < T1, T2 > & dst, unsigned long long offset )
 	{
-		if( src.size() >= offset + sizeof(Binary::Type::NumberOfElements) )
+		if( length >= offset + sizeof(Binary::Type::NumberOfElements) )
 		{
 			Binary::Type::NumberOfElements elements = 0;
-			memmove( &elements, &(src.front()) + offset, sizeof(Binary::Type::NumberOfElements) );
-			if( src.size() >= offset + sizeof(Binary::Type::NumberOfElements) + elements )
+			memmove( &elements, src + offset, sizeof(Binary::Type::NumberOfElements) );
+			if( length >= offset + sizeof(Binary::Type::NumberOfElements) + elements )
 			{
 				unsigned long long tempOffset = offset + sizeof(Binary::Type::NumberOfElements);
 				for( Binary::Type::NumberOfElements i = 0; i < elements; ++i )
 				{
 					T1 temp1;
-					tempOffset = Binary::Restore( src, temp1, tempOffset );
+					tempOffset = Binary::Restore( src, length, temp1, tempOffset );
 					if( tempOffset == 0 )
-					{
 						break;
-					}
-					tempOffset = Binary::Restore( src, dst[temp1], tempOffset );
+					tempOffset = Binary::Restore( src, length, dst[temp1], tempOffset );
 					if( tempOffset == 0 )
-					{
 						break;
-					}
 				}
 				return tempOffset;
 			}
@@ -185,24 +175,22 @@ namespace Binary
 	
 	// std::set
 	template < typename T >
-	unsigned long long Restore( const std::vector < unsigned char > & src, std::set < T > & dst, unsigned long long offset )
+	unsigned long long Restore( const unsigned char * src, const unsigned long long length, std::set < T > & dst, unsigned long long offset )
 	{
-		if( src.size() >= offset + sizeof(Binary::Type::NumberOfElements) )
+		if( length >= offset + sizeof(Binary::Type::NumberOfElements) )
 		{
 			Binary::Type::NumberOfElements elements_ = 0;
-			memmove( &elements_, &(src.front()) + offset, sizeof(Binary::Type::NumberOfElements) );
+			memmove( &elements_, src + offset, sizeof(Binary::Type::NumberOfElements) );
 			const Binary::Type::NumberOfElements elements = elements_;
-			if( src.size() >= offset + sizeof(Binary::Type::NumberOfElements) + elements )
+			if( length >= offset + sizeof(Binary::Type::NumberOfElements) + elements )
 			{
 				unsigned long long tempOffset = offset + sizeof(Binary::Type::NumberOfElements);
 				for( Binary::Type::NumberOfElements i = 0; i < elements; ++i )
 				{
 					T temp;
-					tempOffset = Binary::Restore( src, temp, tempOffset );
+					tempOffset = Binary::Restore( src, length, temp, tempOffset );
 					if( tempOffset == 0 )
-					{
 						return 0;
-					}
 					dst.insert( temp );
 				}
 				return tempOffset;

@@ -1,26 +1,19 @@
-d=$$(date +%s)
-
-
 
 ROOT_PATH = ../../
 include ../../Makefile
 
 
-
-client: Client.cpp $(OBJ)
-	$(CXX) -o Client.exe $^ $(CFLAGS) $(LIB)
-
-server: Server.cpp $(OBJ)
+	
+$(BDIR)/Server3.o: Server.cpp
+	$(CXX) -c -o $@ $< $(CFLAGS) $(INCLUDEPATHS)
+server: $(BDIR)/Server3.o $(OBJ)
 	$(CXX) -o Server.exe $^ $(CFLAGS) $(LIB)
 
-all:
-	$(MAKE) server
-	$(MAKE) client
+$(BDIR)/Client3.o: Client.cpp
+	$(CXX) -c -o $@ $< $(CFLAGS) $(INCLUDEPATHS)
+client: $(BDIR)/Client3.o $(OBJ)
+	$(CXX) -o Client.exe $^ $(CFLAGS) $(LIB)
+
+all: server client
 
 
-
-
-
-
-
-	

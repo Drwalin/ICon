@@ -348,7 +348,7 @@ int main()
 	
 	try
 	{
-		restored = Binary::Restore( data, val1, 311 );
+		restored = Binary::Restore( &(data.front()), data.size(), val1, 311 );
 	}
 	catch( const std::exception & e )
 	{

@@ -55,7 +55,7 @@ namespace ICon
 				{
 					if( Binary::Type::IsValid( receivedMessage, obj, 0 ) )
 					{
-						unsigned long long restored = Binary::Restore( receivedMessage, obj, typeSize );
+						unsigned long long restored = Binary::Restore( &(receivedMessage.front()), receivedMessage.size(), obj, typeSize );
 						if( restored == 0 )
 							ICon::Error::Push( ICon::Error::Code::failedToReceiveToValidType, __LINE__, __FILE__ );
 						this->con->PopMessage();

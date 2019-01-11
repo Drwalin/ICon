@@ -3,7 +3,8 @@ CXX = g++
 CC = gcc
 AR = ar
 LIBPATHS = -L"C:/mingw-w64/lib"
-CFLAGS = -Ofast -m64 -s -std=c++17 -pipe -I"C:\mingw-w64\include"
+INCLUDEPATHS = -I"C:/mingw-w64/include"
+CFLAGS = -Ofast -m64 -s -std=c++17 -pipe
 
 IDIR = $(ROOT_PATH)src
 CDIR = $(ROOT_PATH)src
@@ -22,13 +23,11 @@ OBJ = $(patsubst %,$(BDIR)/%,$(_OBJ))
 
 
 
-
-
-
 $(BDIR)/%.o: $(CDIR)/%.cpp
-	$(CXX) -c -o $@ $< $(CFLAGS)
+	$(CXX) -c -o $@ $< $(CFLAGS) $(INCLUDEPATHS)
 
 dep: $(OBJ)
 	$(AR) -c $(LDIR)/libICon.a -r $^
 
 
+	

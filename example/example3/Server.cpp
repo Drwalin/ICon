@@ -21,7 +21,7 @@ int main()
 			
 			ICon::Connection con( fcon );
 			
-			con << 311.0f;
+			con << 1234.5678;
 			
 			std::string str;
 			
