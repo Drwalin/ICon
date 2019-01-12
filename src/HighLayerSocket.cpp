@@ -269,7 +269,7 @@ namespace ICon
 					unsigned current = this->buffer.GetBytesStored();
 					this->buffer.GetData( dst, current );
 					messageSize -= current;
-					dst += current;
+					dst = ((unsigned char*)(dst)) + current;
 					this->buffer.Clear();
 					while( messageSize != 0 )
 					{
@@ -281,7 +281,7 @@ namespace ICon
 							return;
 						}
 						messageSize -= received;
-						dst += received;
+						dst = ((unsigned char*)(dst)) + received;
 					}
 				}
 			}
