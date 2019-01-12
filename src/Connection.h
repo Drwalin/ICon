@@ -45,11 +45,6 @@ namespace ICon
 		template < typename T >
 		Connection & operator >> ( T & obj );
 		
-		unsigned long long write( const void * src, const unsigned size );
-		// waits until readed and returns bytes to read
-		unsigned long long read( void * dst, const unsigned size );
-		unsigned long long GetNextBufferSize();
-		
 		void SetHighLayerSocket( std::shared_ptr<HighLayerSocket> con );
 		std::shared_ptr<HighLayerSocket> GetHighLayerSocket();
 		
