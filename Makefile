@@ -36,7 +36,7 @@ $(BDIR)/%.o: $(CDIR)/%.cpp
 $(STATICLIB): dep
 
 dep: $(OBJ)
-	$(AR) -c $(LDIR)/libICon.a -r $^ $(LIBBOOST)
+	$(AR) -c $(STATICLIB) -r $^ $(LIBBOOST)
 
 
 	
