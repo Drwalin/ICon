@@ -38,14 +38,14 @@ namespace ICon
 		/*boost::asio::socket_base::bytes_readable*/ void * command;
 		
 		
-		friend class DeepServer;
+		friend class Server;
 		
 		unsigned GetUnreceivedBytes();
 		void ReceiveClose();
 		
 	public:
 		
-		const static unsigned maxBufferSize = (1024*1024) - 1;
+		const static unsigned maxMessageSize = (1024*1024*1024) - 1;
 		
 		bool IsValid() const;
 		

@@ -124,11 +124,11 @@ namespace ICon
 		case ICon::Error::Code::tryingToSendThorughInvalidConnection: return "Trying to send Connection::operator<< through invalid Connection";
 		case ICon::Error::Code::tryingToReceiveFromInvalidConnection: return "Trying to receive Connection::operator>> from invalid Connection";
 		
-		case ICon::Error::Code::tryingToRunAcceptWhileAcceptNoLockIsRunning: return "Trying to call DeepServer::Accept while DeepServer::AcceptNoLock is running";
-		case ICon::Error::Code::tryingToRunSecondInstancOfAcceptNoLock: return "Trying to run second instance of DeepServer::AcceptNoLock in one DeepServer";
+		case ICon::Error::Code::tryingToRunAcceptWhileAcceptNoLockIsRunning: return "Trying to call Server::Accept while Server::AcceptNoLock is running";
+		case ICon::Error::Code::tryingToRunSecondInstancOfAcceptNoLock: return "Trying to run second instance of Server::AcceptNoLock in one Server";
 		
 		case ICon::Error::Code::tryingToDeInintUnexistingContext: return "Trying to DeInit unexisting ICon::ioService";
-		case ICon::Error::Code::tryingToAcceptUsingClosedServer: return "Trying to accept by closed DeepServer";
+		case ICon::Error::Code::tryingToAcceptUsingClosedServer: return "Trying to accept by closed Server";
 		case ICon::Error::Code::tryingToAccessEmptyErrorQueue: return "Trying to access empty queue (ICon::globalErrorQueue)";
 		case ICon::Error::Code::tryingToSendDataByInvalidHighSocketLayer: return "Trying to HighSocketLayer::Send through invalid HighSocketLayer";
 		case ICon::Error::Code::tryingToSendInvalidDataSize: return "Trying to HighSocketLayer::Send invalid data size";

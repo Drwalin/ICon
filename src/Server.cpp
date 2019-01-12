@@ -10,13 +10,13 @@
 	No one can modify or remove this Copyright notice from this file.
 */
 
-#ifndef DEEP_SERVER_CPP
-#define DEEP_SERVER_CPP
+#ifndef SERVER_CPP
+#define SERVER_CPP
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 
-#include "DeepServer.h"
+#include "Server.h"
 #include "Error.h"
 
 #include <chrono>
@@ -24,7 +24,7 @@
 
 namespace ICon
 {
-	bool DeepServer::IsOpened()
+	bool Server::IsOpened()
 	{
 		if( this->acceptor == nullptr )
 			return false;
@@ -33,7 +33,7 @@ namespace ICon
 		return this->opened;
 	}
 	
-	unsigned DeepServer::Accept( std::shared_ptr<HighLayerSocket> con )
+	unsigned Server::Accept( std::shared_ptr<HighLayerSocket> con )
 	{
 		if( this->IsOpened() )
 		{
@@ -75,14 +75,14 @@ namespace ICon
 		return ICon::Error::unknown;
 	}
 	
-	std::shared_ptr<DeepServer> DeepServer::Make()
+	std::shared_ptr<Server> Server::Make()
 	{
-		std::shared_ptr<DeepServer> ret( new DeepServer() );
+		std::shared_ptr<Server> ret( new Server() );
 		ret->self = ret;
 		return ret;
 	}
 	
-	unsigned DeepServer::StartListening( const unsigned short port )
+	unsigned Server::StartListening( const unsigned short port )
 	{
 		this->Close();
 		this->port = port;
@@ -97,7 +97,7 @@ namespace ICon
 		return ICon::Error::Code::failedToAllocateBoostAsioEndpointOrAcceptor;
 	}
 	
-	void DeepServer::StopListening()
+	void Server::StopListening()
 	{
 		if( this->IsOpened() )
 		{
@@ -117,7 +117,7 @@ namespace ICon
 		}
 	}
 	
-	void DeepServer::Close()
+	void Server::Close()
 	{
 		if( this->IsOpened() )
 		{
@@ -134,7 +134,7 @@ namespace ICon
 		this->acceptor = nullptr;
 	}
 	
-	DeepServer::DeepServer() :
+	Server::Server() :
 		isAcceptNoLockRunning(false), keepAcceptNoLockRunning(false)
 	{
 		this->self = nullptr;
@@ -144,7 +144,7 @@ namespace ICon
 		this->endpoint = nullptr;
 	}
 	
-	DeepServer::~DeepServer()
+	Server::~Server()
 	{
 		this->Close();
 	}

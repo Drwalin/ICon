@@ -1,7 +1,7 @@
 
 #include "../../src/Connection.h"
 #include "../../src/HighLayerSocket.h"
-#include "../../src/DeepServer.h"
+#include "../../src/Server.h"
 
 #include <cstring>
 
@@ -11,7 +11,7 @@ int main()
 	ICon::Error::PrintWhenPushed();
 	
 	{
-		std::shared_ptr<ICon::DeepServer> server = ICon::DeepServer::Make();
+		std::shared_ptr<ICon::Server> server = ICon::Server::Make();
 		std::shared_ptr<ICon::HighLayerSocket> fcon( new ICon::HighLayerSocket() );
 		
 		std::vector <int> tab;

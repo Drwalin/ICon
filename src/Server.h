@@ -10,8 +10,8 @@
 	No one can modify or remove this Copyright notice from this file.
 */
 
-#ifndef DEEP_SERVER_H
-#define DEEP_SERVER_H
+#ifndef SERVER_H
+#define SERVER_H
 
 #include <memory>
 #include <atomic>
@@ -22,7 +22,7 @@
 
 namespace ICon
 {
-	class DeepServer final
+	class Server final
 	{
 	private:
 		
@@ -35,13 +35,13 @@ namespace ICon
 		std::atomic<bool> isAcceptNoLockRunning;
 		std::atomic<bool> keepAcceptNoLockRunning;
 		
-		std::shared_ptr<DeepServer> self;
+		std::shared_ptr<Server> self;
 		
 		template < typename CallBackType, typename... Args >
-		friend void _DeepServer_AcceptNoLock_ThreadFunction_OneAccept( std::shared_ptr<DeepServer> server, std::shared_ptr<HighLayerSocket> con, CallBackType callBackFunction, Args... args );;
+		friend void _Server_AcceptNoLock_ThreadFunction_OneAccept( std::shared_ptr<Server> server, std::shared_ptr<HighLayerSocket> con, CallBackType callBackFunction, Args... args );;
 		
 		template < typename CallBackType, typename... Args >
-		friend void _DeepServer_AcceptNoLock_ThreadFunction_OneAccept( std::shared_ptr<DeepServer> server, CallBackType callBackFunction, Args... args );
+		friend void _Server_AcceptNoLock_ThreadFunction_OneAccept( std::shared_ptr<Server> server, CallBackType callBackFunction, Args... args );
 		
 		template < typename CallBackType, typename... Args >
 		void AcceptNoLockRunned( std::shared_ptr<HighLayerSocket> con, CallBackType callBackFunction, Args... args );
@@ -49,7 +49,7 @@ namespace ICon
 		template < typename CallBackType, typename... Args >
 		void AcceptNoLockRunned( CallBackType callBackFunction, Args... args );
 		
-		DeepServer();
+		Server();
 		
 	public:
 		
@@ -65,24 +65,24 @@ namespace ICon
 		void AcceptNoLock( CallBackType callBackFunction, Args... args );
 		
 		
-		static std::shared_ptr<DeepServer> Make();
+		static std::shared_ptr<Server> Make();
 		
 		unsigned StartListening( const unsigned short port );
 		void StopListening();
 		
 		void Close();
 		
-		~DeepServer();
+		~Server();
 	};
 	
 	template < typename CallBackType, typename... Args >
-	void _DeepServer_AcceptNoLock_ThreadFunction_OneAccept( std::shared_ptr<DeepServer> server, std::shared_ptr<HighLayerSocket> con, CallBackType callBackFunction, Args... args );
+	void _Server_AcceptNoLock_ThreadFunction_OneAccept( std::shared_ptr<Server> server, std::shared_ptr<HighLayerSocket> con, CallBackType callBackFunction, Args... args );
 	
 	template < typename CallBackType, typename... Args >
-	void _DeepServer_AcceptNoLock_ThreadFunction_OneAccept( std::shared_ptr<DeepServer> server, CallBackType callBackFunction, Args... args );
+	void _Server_AcceptNoLock_ThreadFunction_OneAccept( std::shared_ptr<Server> server, CallBackType callBackFunction, Args... args );
 };
 
-#include "DeepServer.inl"
+#include "Server.inl"
 
 #endif
 

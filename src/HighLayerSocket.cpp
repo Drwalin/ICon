@@ -298,7 +298,7 @@ namespace ICon
 		{
 			if( buffer != nullptr )
 			{
-				if( bytes > 0 && bytes < HighLayerSocket::maxBufferSize )
+				if( bytes > 0 && bytes < HighLayerSocket::maxMessageSize )
 				{
 					boost::system::error_code ec;
 					unsigned long long ret;
@@ -346,7 +346,7 @@ namespace ICon
 					sumBytesL += bytes[i];
 				}
 				
-				if( sumBytesL < buffers || sumBytesL > (unsigned long long)ICon::HighLayerSocket::maxBufferSize )
+				if( sumBytesL < buffers || sumBytesL > (unsigned long long)ICon::HighLayerSocket::maxMessageSize )
 				{
 					ICon::Error::Push( ICon::Error::tryingToSendInvalidDataSize, __LINE__, __FILE__ );
 					return 0;
